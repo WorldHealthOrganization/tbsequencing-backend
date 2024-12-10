@@ -78,7 +78,7 @@ class SampleResource(resources.ModelResource):
             submitted_on = date.today(),
         )
 
-        #pylint: disable=ignore attribute-defined-outside-init
+        #pylint: disable=attribute-defined-outside-init
         self.package = package
 
         package.save()
