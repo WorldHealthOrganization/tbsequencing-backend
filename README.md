@@ -1,6 +1,59 @@
-# TB-Kb Backend
+# WHO Owner
 
-Based on Django Rest Framework.
+Owned by the Global Tuberculosis Programme, GTB, Geneva Switzerland. References: Carl-Michael Nathanson, Technical Officer.
+
+# Tbsequencing backend
+
+The backend of the tbsequencing portal is based on the Django Rest Framework. All infrastructure required for running the backend is defined under the main [repository](https://github.com/finddx/tbsequencing-infrastructure).
+
+The deployment workflows includes the following:
+
+1. Collecting the static files and copying them into an S3 bucket
+2. Building the backend docker image and pushing at ECR
+3. Running the migration(s)
+4. Forcing deployment of the ECS fargate task to use latest docker image
+
+The backend will be accessible by adding the suffix "/admin/" to your chosen domain address.
+
+Authentication is handled by OIDC connected to an Entra ID tenant.
+
+# Authentication configuration
+
+The system has been integrated to work with Entra ID (formerly Azure AD) authentication, using azure/msal-react on the frontend and django_auth_adfs on the backend.
+
+msal-react uses ID tokens whereas django_auth_adfs uses Access tokens. Reference:  https://oauth.net/id-tokens-vs-access-tokens/
+
+To configure the application on Entra ID, we will need to register two apps, one for the frontend and one for the backend.
+
+## Backend application
+
+For the backend Entra ID application, set the Redirect URI in a Web Scope to https://*domain-address*/api/v1/oauth2/callback
+ 
+⚠️For testing and development purposes only, the Redirect URI can be defined under http scheme, only with domain name localhost.⚠️
+
+Expose an API that both Admins and users can consent to. 
+
+Retrieve the Tenant ID, the Application ID and create a client secret so that you can fill the following keys in the AWS Secrets that was created by the [main repository](https://github.com/finddx/tbsequencing-infrastructure)
+
+|Key name|Notes|
+|-----|--------|
+|ADFS_TENANT_ID |Tenant identifier |
+|ADFS_CLIENT_ID|Application (client) ID of the backend in the Entra ID app declaration|
+|ADFS_CLIENT_SECRET|Client Secret value, requested earlier on the Entra ID backend app declaration, under the Certificates & secrets tab|
+
+## Access to the admin django panel
+
+The Django admin panel will be served at https://*domain-address*/admin/
+
+Each users that must be granted access to the admin panel must be assigned this role under the "Enterprise applications" view, which is available on the landing panel of the "Azure AD" service.
+
+Under "Enterprise applications", select the "Users and groups" panel. There select "Add User/Group" and assign the users to the admins groups.
+
+Finally, the Entra ID admin must grant consent for the permission in the same "Enterprise application" menu.
+
+
+# Development set up 
+
 
 ## Project setup
 
@@ -219,7 +272,11 @@ on how to deal with database changes.
 ## Connecting a local Django web container with a remote database
 
 Use an ssh tunnel to allow the local container to connect to the remote database.
-Use the `-g (Allows remote hosts to connect to local forwarded ports.)` and `-L (Specifies that connections to the given TCP port or Unix socket on the local (client) host are to be forwarded to the given host and port, or Unix socket, on the remote side.)` options.
+Use the following options: 
+```
+-g (Allows remote hosts to connect to local forwarded ports.)
+-L (Specifies that connections to the given TCP port or Unix socket on the local (client) host are to be forwarded to the given host and port, or Unix socket, on the remote side.)
+```
 
 ```
 ssh -g -L ${local_port}:${remote_database_host_name}:${remote_port} ec2-user@${ec2_hostname/ip_address}
@@ -229,6 +286,7 @@ If you use the default neworking mode in docker compose (i.e. `bridge`), you mus
 It cannot be `localhost` (unless you change the networking mode to `host`). Usually it's `172.17.0.1`. 
 
 Modify the following environment variable in `.dc.env`. You can fetch from secret manager the master username/master password.
+
 ```
 DB_HOST=172.17.0.1
 DB_PORT=5432
@@ -236,4 +294,5 @@ DB_USER=tbkbmasteruser
 DB_PASSWORD=averysecretpassword
 DB_NAME=tbkbdb
 ```
+
 Only ever connect to the staging/test remote database. Connecting via SSH to the production database should be impossible anyway.
