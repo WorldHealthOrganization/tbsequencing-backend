@@ -1,6 +1,6 @@
 # WHO Owner
 
-Owned by the Global Tuberculosis Programme, GTB, Geneva Switzerland. References: Carl-Michael Nathanson, Technical Officer.
+Owned by the Global Tuberculosis Programme, GTB, Geneva Switzerland. References: Carl-Michael Nathanson.
 
 # Tbsequencing backend
 
