@@ -279,7 +279,7 @@ Use the following options:
 ```
 
 ```
-ssh -g -L ${local_port}:${remote_database_host_name}:${remote_port} ec2-user@${ec2_hostname/ip_address}
+ssh -i ${path_to_private_key} -g -L ${local_port}:${remote_database_host_name}:${remote_port} ec2-user@${ec2_hostname/ip_address}
 ```
 
 If you use the default neworking mode in docker compose (i.e. `bridge`), you must the correct local ip address for the database host. 
