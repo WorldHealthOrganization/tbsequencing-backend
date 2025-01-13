@@ -283,13 +283,15 @@ ssh -i ${path_to_private_key} -g -L ${local_port}:${remote_database_host_name}:$
 ```
 
 If you use the default neworking mode in docker compose (i.e. `bridge`), you must the correct local ip address for the database host. 
-It cannot be `localhost` (unless you change the networking mode to `host`). Usually it's `172.17.0.1`. 
+It cannot be `localhost` (unless you change the networking mode to `host`).
+
+For WSL, it's usually `172.17.0.1`. 
 
 Modify the following environment variable in `.dc.env`. You can fetch from secret manager the master username/master password.
 
 ```
 DB_HOST=172.17.0.1
-DB_PORT=5432
+DB_PORT=${local_port}
 DB_USER=tbkbmasteruser
 DB_PASSWORD=averysecretpassword
 DB_NAME=tbkbdb
