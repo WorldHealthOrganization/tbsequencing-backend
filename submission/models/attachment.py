@@ -35,6 +35,8 @@ class Attachment(models.Model):
 
     package = models.ForeignKey("Package", models.CASCADE, related_name="attachments")
 
+    metadata = models.JSONField(default=dict)
+
     def __str__(self):
         """Represent instance of an attachment."""
         return f"<Attachment #{self.pk} {self.type} {self.original_filename}>"

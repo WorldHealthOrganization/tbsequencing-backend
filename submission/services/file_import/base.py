@@ -1,32 +1,27 @@
 import re
 import tempfile
 from abc import ABCMeta, abstractmethod
+from datetime import date
 from io import BytesIO
 from pathlib import Path
-from typing import Type, Iterable, Optional
-from datetime import date
-from dateutil import parser
-from pydantic import BaseModel
+from typing import Iterable, Optional, Type
 
-from psycopg2.extras import DateRange
 import openpyxl
 import openpyxl.drawing.image
 import pandas as pd
+from dateutil import parser
 from django import forms
 from django.contrib.staticfiles import finders
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.db import IntegrityError
 from django.db.models import Model
+from psycopg2.extras import DateRange
+from pydantic import BaseModel
 from rest_framework import serializers
 from service_objects import fields as f
 
-from genphen.models import (
-    DrugSynonym,
-    Country,
-    Drug,
-)
-
+from genphen.models import Country, Drug, DrugSynonym
 from submission.models import Package, SampleAlias
 from submission.services import Service
 
@@ -58,15 +53,12 @@ class PackageFileImportService(Service, metaclass=ABCMeta):
 
     SHEET_NAME: str = None
 
-
     MANDATORY_COLUMNS = [
         "Sample Id",
         "DST Method",
     ]
 
-    NON_NULL_COLUMNS = [
-        "Sample Id"
-    ]
+    NON_NULL_COLUMNS = ["Sample Id"]
 
     FORCE_CASE_COLUMNS = [
         "Sample Id",
@@ -98,9 +90,7 @@ class PackageFileImportService(Service, metaclass=ABCMeta):
         super().__init__(*args, **kwargs)
         self._drugs = {
             ds.drug_name_synonym.upper(): ds.drug for ds in DrugSynonym.objects.all()
-        } | {
-            ds.drug_name.upper(): ds for ds in Drug.objects.all()
-        }
+        } | {ds.drug_name.upper(): ds for ds in Drug.objects.all()}
 
         self._countries = {}
         for country in Country.objects.all():
@@ -114,7 +104,7 @@ class PackageFileImportService(Service, metaclass=ABCMeta):
                 self._countries[country.country_official_name.upper()] = country
 
         self.test_columns = {}
-
+        self.not_used_columns = []
 
     def get_sampling_date(self, val: str) -> Optional[DateRange]:
         """Return range formated sampling date."""
@@ -122,41 +112,44 @@ class PackageFileImportService(Service, metaclass=ABCMeta):
         if val.strip():
             # Try to validate a DateRange expression first
             date_range_matched = re.match(
-                r'([\[\(])(\d{4}-\d{2}-\d{2}),(\d{4}-\d{2}-\d{2})([\)\]])',
-                val.replace(" ", "")
+                r"([\[\(])(\d{4}-\d{2}-\d{2}),(\d{4}-\d{2}-\d{2})([\)\]])",
+                val.replace(" ", ""),
             )
             if date_range_matched:
                 lbound, start, end, ubound = date_range_matched.groups()
                 returned_date = DateRange(
                     lower=parser.parse(start).date(),
                     upper=parser.parse(end).date(),
-                    bounds=lbound+ubound
+                    bounds=lbound + ubound,
                 )
-            if re.match(r'^[0-9]{4}$', val.strip()):
+            if re.match(r"^[0-9]{4}$", val.strip()):
                 year = int(val.strip())
                 returned_date = DateRange(
                     lower=date(year=year, month=1, day=1),
                     upper=date(year=year, month=12, day=31),
                     bounds="[]",
                 )
-            if re.match(r'^[0-9]{4}-[0-9]{1,2}$', val.strip()):
+            if re.match(r"^[0-9]{4}-[0-9]{1,2}$", val.strip()):
                 year, month = [int(x) for x in val.strip().split("-")]
                 returned_date = DateRange(
                     lower=date(year=year, month=month, day=1),
-                    upper=date(year=year+(month//12), month=(month%12)+1, day=1),
+                    upper=date(
+                        year=year + (month // 12),
+                        month=(month % 12) + 1,
+                        day=1,
+                    ),
                     bounds="[)",
                 )
-            if re.match(r'^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$', val.strip()):
+            if re.match(r"^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$", val.strip()):
                 year, month, day = [int(x) for x in val.strip().split("-")]
                 returned_date = DateRange(
                     lower=date(year=year, month=month, day=day),
                     upper=date(year=year, month=month, day=day),
                     bounds="[]",
                 )
-        if returned_date and returned_date.lower>date.today():
+        if returned_date and returned_date.lower > date.today():
             raise ValidationError("A sampling date in the future was received.")
         return returned_date
-
 
     def get_country(self, val: str) -> Optional[Country]:
         """Parse value as a country."""
@@ -181,7 +174,6 @@ class PackageFileImportService(Service, metaclass=ABCMeta):
         This runs within file validation routine,
         so any ValidationError thrown will be considered as file validation error.
         """
-
         if dataframe.shape[0] < 1:
             # At least 1 row expected
             raise ValidationError("An empty table received.")
@@ -207,7 +199,10 @@ class PackageFileImportService(Service, metaclass=ABCMeta):
             # since we have all types as strings here,
             # we can check empty and whitespace values like that
             empty_values = ~dataframe[mandatory_col].str.strip().astype(bool)
-            if mandatory_col in self.NON_NULL_COLUMNS and not dataframe[empty_values].empty:
+            if (
+                mandatory_col in self.NON_NULL_COLUMNS
+                and not dataframe[empty_values].empty
+            ):
                 raise ValidationError(
                     f"{mandatory_col}: Empty values in mandatory column.",
                 )
@@ -218,7 +213,7 @@ class PackageFileImportService(Service, metaclass=ABCMeta):
 
         unique_col: Iterable
         for unique_col in self.UNIQUE_COLUMNS:
-            if len(unique_col)==len(list(set(unique_col) & set(dataframe.columns))):
+            if len(unique_col) == len(list(set(unique_col) & set(dataframe.columns))):
                 group = dataframe.groupby(unique_col).size().reset_index(name="_freq_")
                 freq_gt_1 = group["_freq_"] > 1
                 all_non_empty = group[unique_col].apply(all, axis=1)
@@ -229,15 +224,17 @@ class PackageFileImportService(Service, metaclass=ABCMeta):
                     )
 
     def parse_row_named_columns(self, row):
-        """Parse row common attributes for MIC and PDST"""
+        """Parse row common attributes for MIC and PDST."""
         data = {
             "sample_id": row["Sample Id"],
             "medium": row["DST Method"],
-            "fastq_prefix":
-              row["FASTQ prefix"].strip().rstrip("_") if row.get("FASTQ prefix")
-               else None,
+            "fastq_prefix": (
+                row["FASTQ prefix"].strip().rstrip("_")
+                if row.get("FASTQ prefix")
+                else None
+            ),
             "tests": [],
-            "metadata" : {},
+            "metadata": {},
         }
 
         for row_col, (data_col, parse_func) in self.named_columns.items():
