@@ -9,7 +9,6 @@ python-dotenv = "*"
 djangorestframework = "*"
 markdown = "*"
 django-filter = "*"
-psycopg2 = "*"
 django-cors-headers = "*"
 django-phonenumber-field = {extras = ["phonenumbers"], version = "*"}
 pyyaml = "*"
@@ -43,6 +42,9 @@ cffi = "*"
 django-auth-adfs = "*"
 pillow = "*"
 watchtower = "*"
+psycopg2-binary = "*"
+numpy = "==1.26.4"
+isort = "*"
 
 [dev-packages]
 pre-commit = "*"

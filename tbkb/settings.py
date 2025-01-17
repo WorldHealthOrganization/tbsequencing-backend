@@ -30,7 +30,7 @@ env = environ.Env(
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
     CORS_ALLOWED_ORIGINS=(list, []),
-    SITE_HEADER = (str, "TbKb WHO administration (INTERNAL USE ONLY)")
+    SITE_HEADER=(str, "TbKb WHO administration (INTERNAL USE ONLY)"),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -52,14 +52,20 @@ SECRET_KEY = env("SECRET_KEY")
 
 SITE_HEADER = env("SITE_HEADER")
 
-CLOUDWATCH_LOGGROUP_SERVER = env("CLOUDWATCH_LOGGROUP_SERVER", default = "/backend/server")
+CLOUDWATCH_LOGGROUP_SERVER = env(
+    "CLOUDWATCH_LOGGROUP_SERVER",
+    default="/backend/server",
+)
 
-CLOUDWATCH_LOGGROUP_ADMIN =  env("CLOUDWATCH_LOGGROUP_ADMIN", default = "/backend/admin-activity")
+CLOUDWATCH_LOGGROUP_ADMIN = env(
+    "CLOUDWATCH_LOGGROUP_ADMIN",
+    default="/backend/admin-activity",
+)
 
-CLOUDWATCH_LOGGROUP_DELEGATE =  env(
+CLOUDWATCH_LOGGROUP_DELEGATE = env(
     "CLOUDWATCH_LOGGROUP_DELEGATE",
-    default = "/backend/delegate-activity"
-    )
+    default="/backend/delegate-activity",
+)
 
 
 # SECURITY WARNING: don't run with debug turned on in production!

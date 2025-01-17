@@ -1,25 +1,21 @@
 import logging
 import re
-from typing import List, Tuple, Optional, Dict
+from typing import Dict, List, Optional, Tuple
 
 import pandas as pd
 from django.core.exceptions import ValidationError
 from django.core.files import File
+from psycopg2.extras import DateRange
 from service_objects import fields as f
 
-from psycopg2.extras import DateRange
+from genphen.models import Country, Drug, GrowthMedium, PDSAssessmentMethod
+from submission.models import Attachment, Package, PDSTest, SampleAlias
 
-from genphen.models import (
-    PDSAssessmentMethod,
-    GrowthMedium,
-    Drug,
-    Country,
-)
-from submission.models import PDSTest, SampleAlias, Package, Attachment
-from .base import PackageFileImportService, BaseRow
 from .. import Service
+from .base import BaseRow, PackageFileImportService
 
 log = logging.getLogger(__name__)
+
 
 class PDSTRow(BaseRow):
     """Single pDST table row model."""
@@ -106,12 +102,9 @@ class PackageFilePDSTImportService(PackageFileImportService):
     MODEL_CLASS = PDSTest
     SHEET_NAME = "PDST"
 
-
     COLNAME_REGEX = re.compile(
         r"^([\w\-\/]+)\s*?(?:\(\s*?(?:(\d+(?:[.,]\d+)?)(?:\s*mg/L)?|CC)\s*?\))?$",
     )
-
-
 
     def __init__(self, *args, **kwargs):
         """Cache necessary relation records on startup."""
@@ -125,10 +118,7 @@ class PackageFilePDSTImportService(PackageFileImportService):
         self._assessment_methods = {
             p.method_name.upper(): p for p in PDSAssessmentMethod.objects.all()
         }
-        self._mediums = {
-            m.medium_name.upper(): m for m in GrowthMedium.objects.all()
-        }
-        self.test_columns = {}
+        self._mediums = {m.medium_name.upper(): m for m in GrowthMedium.objects.all()}
 
     def locate_test_columns(self, dataframe: pd.DataFrame):
         """
@@ -151,10 +141,9 @@ class PackageFilePDSTImportService(PackageFileImportService):
                 drug = self._drugs[drug_code.upper()]
             except KeyError as exc:
                 raise ValidationError(
-                    f"{column}: Unknown drug code. Please check the column header values."
+                    f"{column}: Unknown drug code. Please check the column header values.",
                 ) from exc
             self.test_columns[column] = (drug, concentration)
-
 
     def get_medium(self, val: str) -> GrowthMedium:
         """Parse value as a medium. Raise error, if not found."""
@@ -163,9 +152,11 @@ class PackageFilePDSTImportService(PackageFileImportService):
         return self._mediums[val.strip().upper()]
 
     def get_assessment(self, val: str) -> PDSAssessmentMethod:
-        """Parse value for the assessment method. Returns None if val is none.
-        Returns error if val exists and not found."""
-        print(val)
+        """
+        Parse value for the assessment method. Returns None if val is none.
+
+        Returns error if val exists and not found.
+        """
         if not val:
             return None
         return self._assessment_methods[val.strip().upper()]
@@ -237,6 +228,13 @@ class PackageFilePDSTImportService(PackageFileImportService):
 
         for _, raw in dataframe.iterrows():
             row: PDSTRow = self.parse_row(raw)
+
+            self.not_used_columns = (
+                list(row.metadata.keys())
+                if not self.not_used_columns
+                else self.not_used_columns
+            )
+
             if row.sample_id in existing_aliases:
                 # alias already exist, update
                 alias: SampleAlias = existing_aliases[row.sample_id]
@@ -263,7 +261,6 @@ class PackageFilePDSTImportService(PackageFileImportService):
 
             tests.extend(row.iter_tests(package, alias))
 
-
         self._import_into_db(
             aliases_to_update,
             ["country", "sampling_date", "fastq_prefix"],
@@ -283,6 +280,7 @@ class PackageFilePDSTImportService(PackageFileImportService):
             original_filename=file.name,
             size=file.size,
             package=self.cleaned_data["package"],
+            metadata={"not_used_columns": self.not_used_columns},
         )
 
 
