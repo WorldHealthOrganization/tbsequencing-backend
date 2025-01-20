@@ -17,4 +17,5 @@ class AttachmentSerializer(serializers.ModelSerializer):
             "file",
             "size",
             "original_filename",
+            "metadata",
         ]
