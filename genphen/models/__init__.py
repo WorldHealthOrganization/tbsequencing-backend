@@ -14,4 +14,5 @@ from .variant_to_annotation import VariantToAnnotation
 from .variant_lineage_association import VariantLineageAssociation
 from .lineage import Lineage
 from .promoter_distance import PromoterDistance
+from .pdstest_category import PDSTestCategory
 from .views import *

@@ -6,4 +6,5 @@ from . import (
     lineage,
     variant_lineage_association,
     promoter_distance,
+    pdstest_category
 )
