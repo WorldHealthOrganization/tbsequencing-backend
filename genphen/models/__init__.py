@@ -15,4 +15,5 @@ from .variant_lineage_association import VariantLineageAssociation
 from .lineage import Lineage
 from .promoter_distance import PromoterDistance
 from .pdstest_category import PDSTestCategory
+from .variant_additional_info import VariantAdditionalInfo
 from .views import *
