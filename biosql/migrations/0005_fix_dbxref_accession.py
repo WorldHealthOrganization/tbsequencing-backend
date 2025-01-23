@@ -15,19 +15,19 @@ class Migration(migrations.Migration):
     operations = [
             migrations.RunSQL(
                 sql = [("""
-                UPDATE dbxref.accession
+                UPDATE biosql.dbxref
                     SET
-                        value = %s
+                        accession = %s
                     WHERE
-                        value = %s;
+                        accession = %s;
                 """, [uniprot_correct_prot_alr_id, ncbi_wrong_prot_alr_id]
                 )],
                 reverse_sql=[("""            
-                UPDATE dbxref.accession
+                UPDATE biosql.dbxref
                     SET
-                        value = %s
+                        accession = %s
                     WHERE
-                        value = %s;
+                        accession = %s;
                 """, [ncbi_wrong_prot_alr_id, uniprot_correct_prot_alr_id]
                 )]
             ),
