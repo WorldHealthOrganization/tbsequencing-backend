@@ -7,5 +7,6 @@ from . import (
     variant_lineage_association,
     promoter_distance,
     pdstest_category,
-    ecoffs
+    ecoffs,
+    variant_additional_info
 )

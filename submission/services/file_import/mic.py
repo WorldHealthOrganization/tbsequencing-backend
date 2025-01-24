@@ -1,18 +1,16 @@
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
+
 import pandas as pd
 from django.core.exceptions import ValidationError
-from psycopg2.extras import NumericRange, DateRange
+from psycopg2.extras import DateRange, NumericRange
 from service_objects import fields as f
 
-from genphen.models import (
-    Drug,
-    Country,
-)
-from submission.models import MICTest, SampleAlias, Package, Attachment
+from genphen.models import Country, Drug
+from submission.models import Attachment, MICTest, Package, SampleAlias
 from submission.services import Service
 from submission.util.range import parse_numeric_range
 
-from .base import PackageFileImportService, BaseRow
+from .base import BaseRow, PackageFileImportService
 
 
 class MICRow(BaseRow):
@@ -30,8 +28,6 @@ class MICRow(BaseRow):
     sampling_date: Optional[DateRange] = None
 
     tests: List[Tuple[Drug, NumericRange]]
-
-
 
     """(drug, MIC range)"""
 
@@ -69,7 +65,7 @@ class PackageFileMICImportService(PackageFileImportService):
 
             if not self._drugs.get(colname.upper()):
                 raise ValidationError(
-                    f"{colname}: Unknown drug code. Please check the column header values."
+                    f"{colname}: Unknown drug code. Please check the column header values.",
                 )
 
     def parse_row(self, row: pd.Series) -> MICRow:
@@ -149,7 +145,6 @@ class PackageFileMICImportService(PackageFileImportService):
                 if aliases_to_create.get(alias.name):
                     alias = aliases_to_create[alias.name]
                 else:
-                    print(alias)
                     aliases_to_create[alias.name] = alias
 
             all_tests.extend(row.iter_tests(package, alias))
