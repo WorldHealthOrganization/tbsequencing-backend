@@ -1,4 +1,5 @@
 """Tests that are generic for both PDS/MIC tests import services."""
+
 import pytest
 from django.core.files import File
 from rest_framework import serializers
@@ -25,8 +26,6 @@ from submission.services.file_import import (
     "service_class",
     (PackageFileMICImportService, PackageFilePDSTImportService),
 )
-
-# pylint: disable=unused-argument,too-many-arguments
 def test_validation_errors_mic(
     package_of,
     alice,
@@ -35,7 +34,7 @@ def test_validation_errors_mic(
     error_message,
     service_class,
     drugs,
-):  # pylint: disable=too-many-arguments
+):  # pylint: disable=too-many-arguments, too-many-positional-arguments, unused-argument
     """Test against validation error scenarios."""
     package = package_of(alice)
     with open(shared_datadir / filename, mode="rb") as file:
@@ -64,8 +63,8 @@ def test_duplicate_fastq_prefix_on_upsert(
     countries,
     service_class1,
     service_class2,
-):
-    """Duplicated fastq prefix, imported from second file for another sample, raises error."""
+):  # pylint: disable=unused-argument, too-many-positional-arguments
+    """Duplicated fastq prefix, imported from second file for another sample."""
     package = package_of(alice)
     with open(shared_datadir / "duplicate_fastq_on_upsert.xlsx", mode="rb") as file:
         service_class1().execute(

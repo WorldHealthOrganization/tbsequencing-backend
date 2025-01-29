@@ -3,9 +3,10 @@ from decimal import Decimal
 
 from psycopg2.extras import DateRange, NumericRange
 
-from genphen.models import Drug, PDSAssessmentMethod
 from biosql.models import Taxon
-from ..models import Sample, Package
+from genphen.models import Drug, PDSAssessmentMethod
+
+from ..models import Package, Sample
 
 
 class PackageGenerator:
@@ -31,9 +32,9 @@ class PackageGenerator:
         sample = self.package.samples.create(
             ncbi_taxon=Taxon.objects.first(),
             country_id=country,
-            sampling_date=DateRange(date(yoi, 1, 1), date(yoi, 12, 31))
-            if yoi
-            else None,
+            sampling_date=(
+                DateRange(date(yoi, 1, 1), date(yoi, 12, 31)) if yoi else None
+            ),
         )
         self.last_sample = sample
         return sample
@@ -55,16 +56,16 @@ class PackageGenerator:
         fastq_prefix: str = None,
         country: str = None,
         yoi: int = None,
-    ):  # pylint: disable=too-many-arguments
+    ):  # pylint: disable=too-many-arguments, too-many-positional-arguments
         """Create and add alias to alias list."""
         alias = self.package.sample_aliases.create(
             name=name,
             sample=sample,
             fastq_prefix=fastq_prefix,
             country=country,
-            sampling_date=DateRange(date(yoi, 1, 1), date(yoi, 12, 31))
-            if yoi
-            else None,
+            sampling_date=(
+                DateRange(date(yoi, 1, 1), date(yoi, 12, 31)) if yoi else None
+            ),
         )
         self.last_alias = alias
         return alias
@@ -86,7 +87,7 @@ class PackageGenerator:
         staging: bool = True,
         drug_name: str = None,
         drug: Drug = None,
-    ):  # pylint: disable=too-many-arguments
+    ):  # pylint: disable=too-many-arguments, too-many-positional-arguments
         """Create pds test and add it to pds tests list."""
         pdst = self.alias.pds_tests.create(
             test_result=result,
@@ -109,7 +110,7 @@ class PackageGenerator:
         staging=True,
         range_from=0,
         range_to=1,
-    ):  # pylint: disable=too-many-arguments
+    ):  # pylint: disable=too-many-arguments, too-many-positional-arguments
         """Create and return new MIT test."""
         mic = self.alias.mic_tests.create(
             package=self.alias.package,

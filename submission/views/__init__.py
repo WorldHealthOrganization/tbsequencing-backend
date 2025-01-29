@@ -1,4 +1,5 @@
 from .contributors import PackageContributorViewSet
+from .genotype_resistance import GenotypeResistanceViewSet
 from .messages import PackageMessagesViewSet
 from .mic_tests import PackageMICTestsViewSet
 from .packages import PackageViewSet

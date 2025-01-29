@@ -94,6 +94,7 @@ class SampleAlias(VerdictMixin):
         max_length=128,
         choices=Origin.choices,
         default=Origin.TBKB,  # that default is only for django
+        db_index=True,
     )
     origin_label = models.CharField(max_length=1024, default="")
 
@@ -127,3 +128,7 @@ class SampleAlias(VerdictMixin):
                 name="uc__samplealias__package__fastq_prefix",
             ),
         ]
+
+    def __str__(self):
+        """Human readable representation."""
+        return f"{self.pk} - {self.name} - {self.origin}"

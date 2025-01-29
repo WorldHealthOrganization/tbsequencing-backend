@@ -13,11 +13,16 @@ repos:
     -   id: detect-private-key
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
--   repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.10.0
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.3
     hooks:
-    - id: isort
-      exclude: migrations/
+    -   id: ruff
+        types_or: [ python, pyi ]
+        args: ["check", "--select", "I", "--fix", --line-length=100]
+        exclude: migrations/
+    -   id: ruff-format
+        types_or: [ python, pyi ]
+        exclude: migrations/
 -   repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.9.0
     hooks:
@@ -48,10 +53,6 @@ repos:
             --skip,
             "B311"  # Standard pseudo-random generators are not suitable for security
         ]
--   repo: https://github.com/psf/black
-    rev: 22.3.0
-    hooks:
-    -   id: black
 -   repo: https://github.com/PyCQA/pydocstyle
     rev: 6.1.1
     hooks:

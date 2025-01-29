@@ -1,9 +1,9 @@
 """Tests that are generic for both PDS/MIC tests import services."""
+
 import pytest
 from django.core.files import File
 
 from genphen.models import Country
-
 from submission.services.file_import import (
     PackageFileMICImportService,
     PackageFilePDSTImportService,
@@ -11,6 +11,7 @@ from submission.services.file_import import (
 
 FILE_VALID = "pdst1__valid.xlsx"
 FILE_VALID_2 = "pdst2__valid.xlsx"
+
 
 @pytest.mark.parametrize(
     "file_name,sample_name,country_code,service_class",
@@ -36,7 +37,7 @@ def test_new_sample_has_country(
     countries,
     growth_mediums,
     assessment_methods,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # pylint: disable=unused-argument,too-many-arguments,too-many-positional-arguments
     """New sample has country specified."""
     with open(shared_datadir / file_name, mode="rb") as file:
         service_class().execute(

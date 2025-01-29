@@ -12,7 +12,7 @@ def test_validate_uploaded_file(
     alice,
     shared_datadir,
     mocker,
-):  # pylint: disable=too-many-arguments
+):  # pylint: disable=too-many-arguments, too-many-positional-arguments
     """
     S3 uploaded file fetched from TMP and validated successfully.
 
@@ -67,7 +67,7 @@ def test_failed_validate_uploaded_file(
     alice,
     shared_datadir,
     mocker,
-):  # pylint: disable=too-many-arguments
+):  # pylint: disable=too-many-arguments, too-many-positional-arguments
     """S3 file does not pass validation, and deleted from TMP."""
     endpoint = reverse(
         "v1:submission:packagesequencingdata-fetch",
