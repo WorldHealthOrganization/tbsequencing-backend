@@ -4,9 +4,8 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ("genphen", "0013_pdstestcategory"),
+        ("genphen", "0014_alter_pdstestcategory_options_variantadditionalinfo"),
     ]
 
     operations = [
