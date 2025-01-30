@@ -14,9 +14,4 @@ class Migration(migrations.Migration):
             name="pdstestcategory",
             options={"verbose_name_plural": "PDS Test Categories"},
         ),
-        migrations.AlterField(
-            model_name="drug",
-            name="drug_id",
-            field=models.AutoField(db_index=True, primary_key=True, serialize=False),
-        ),
     ]

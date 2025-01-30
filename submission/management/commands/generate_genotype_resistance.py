@@ -33,14 +33,14 @@ class Command(BaseCommand):
         drugs = list(Drug.objects.filter(pk__in=range(1, 26)))
         if not drugs:
             for i in range(1, 26):
-                drug = Drug(drug_id=i, drug_name=f"Drug{i}", drug_code=f"D{i}")
+                drug = Drug(drug_id=i, drug_name=f"testDrug{i}", drug_code=f"D{i}")
                 drug.save()
             drugs = list(Drug.objects.filter(pk__in=range(1, 26)))
 
         # Ensure Package exists
         package, _ = Package.objects.get_or_create(
             pk=9,
-            defaults={"name": "Default Package", "description": "Generated package"},
+            defaults={"name": "test Default Package", "description": "Generated package"},
         )
 
         samples = []
@@ -51,6 +51,7 @@ class Command(BaseCommand):
             sample = Sample(
                 origin="NCBI",
                 ncbi_taxon=taxon,
+                isolation_source="test",
             )
             samples.append(sample)
 
@@ -58,7 +59,7 @@ class Command(BaseCommand):
                 sample_alias = SampleAlias(
                     sample=sample,
                     origin="BioSample",
-                    name="".join(random.choices("0123456789ABCDEF", k=15)),
+                    name="test" + "".join(random.choices("0123456789ABCDEF", k=15)),
                     package=package,
                 )
                 sample_aliases.append(sample_alias)
@@ -66,7 +67,7 @@ class Command(BaseCommand):
             genotype_resistance = GenotypeResistance(
                 sample=sample,
                 drug=random.choice(drugs),
-                variant="".join(random.choices("0123456789ABCDEF", k=15)),
+                variant="test" + "".join(random.choices("0123456789ABCDEF", k=15)),
                 resistance_flag=random.choice(["S", "R", "I"]),
             )
             genotype_resistances.append(genotype_resistance)

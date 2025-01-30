@@ -8,7 +8,7 @@ class Drug(models.Model):
 
     objects: models.Manager
 
-    drug_id = models.AutoField(primary_key=True, db_index=True)
+    drug_id = models.AutoField(primary_key=True)
     drug_name = models.CharField(max_length=8_192, unique=True)
     # preferred drug code
     drug_code = models.CharField(max_length=8_192, unique=True)
