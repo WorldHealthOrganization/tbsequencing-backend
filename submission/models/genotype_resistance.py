@@ -1,25 +1,31 @@
-from django.db import models as m
+from django.db import models
 
 
-class GenotypeResistance(m.Model):
+class GenotypeResistance(models.Model):
     """Predicted (genotypical) resistance data."""
 
-    objects: m.Manager
+    objects: models.Manager
 
-    sample = m.ForeignKey(
+    sample = models.ForeignKey(
         "Sample",
-        on_delete=m.CASCADE,
+        on_delete=models.CASCADE,
         related_name="genotype_resistances",
     )
-    drug = m.ForeignKey(
+    drug = models.ForeignKey(
         "genphen.Drug",
-        on_delete=m.CASCADE,
+        on_delete=models.CASCADE,
         related_name="genotype_resistances",
     )
-    variant = m.CharField(max_length=32 * 1024)  # not a FK to Variant
+    variant = models.CharField(max_length=32 * 1024)
 
-    version = m.IntegerField(
-        default=1
-    )
+    version = models.IntegerField(default=1, db_index=True)
 
-    resistance_flag = m.CharField(max_length=10)
+    resistance_flag = models.CharField(max_length=10)
+
+    class Meta:
+        """Meta class."""
+
+        indexes = [
+            models.Index(fields=["sample", "drug"]),
+            models.Index(fields=["version", "drug_id"], name="idx_version_drug_id"),
+        ]

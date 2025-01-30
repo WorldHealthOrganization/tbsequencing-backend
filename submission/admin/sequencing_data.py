@@ -1,69 +1,55 @@
 from datetime import date
 
 from django.contrib import admin
-
 from import_export import fields, resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.widgets import ForeignKeyWidget
 
-from submission.models import SequencingData, Sample
+from submission.models import Sample, SequencingData
+
 from .sequencing_data_hash_inline import SequencingDataHashInline
 
 
 class SequencingDataResource(resources.ModelResource):
-    """
-    Import created for CNCB specific samples.
-    """
+    """Import created for CNCB specific samples."""
 
-    library_name = fields.Field(
-        column_name="SeqId",
-        attribute="library_name"
-    )
+    library_name = fields.Field(column_name="SeqId", attribute="library_name")
 
     sample = fields.Field(
         column_name="BioSampleId",
         attribute="sample",
-        widget=ForeignKeyWidget(Sample, field="biosample_id")
+        widget=ForeignKeyWidget(Sample, field="biosample_id"),
     )
 
-    data_location = fields.Field(
-        column_name="DataLocation",
-        attribute="data_location"
-    )
+    data_location = fields.Field(column_name="DataLocation", attribute="data_location")
 
-    file_path = fields.Field(
-        column_name="FilePath",
-        attribute="file_path"
-    )
+    file_path = fields.Field(column_name="FilePath", attribute="file_path")
 
     library_preparation_strategy = fields.Field(
         column_name="LibraryStrategy",
-        attribute="library_preparation_strategy"
+        attribute="library_preparation_strategy",
     )
 
-    dna_source = fields.Field(
-        column_name="LibrarySource",
-        attribute="dna_source"
-    )
+    dna_source = fields.Field(column_name="LibrarySource", attribute="dna_source")
 
     dna_selection = fields.Field(
         column_name="LibrarySelection",
-        attribute="dna_selection"
+        attribute="dna_selection",
     )
 
     sequencing_platform = fields.Field(
         column_name="Platform",
-        attribute="sequencing_platform"
+        attribute="sequencing_platform",
     )
 
     library_layout = fields.Field(
         column_name="LibraryLayout",
-        attribute="library_layout"
+        attribute="library_layout",
     )
-
 
     class Meta:
         """Meta class for the SequencingDataResource."""
+
         model = SequencingData
 
         exclude = (
@@ -74,7 +60,7 @@ class SequencingDataResource(resources.ModelResource):
             "assay",
             "packages",
             "created_at",
-            "s3_storage_class"
+            "s3_storage_class",
         )
 
         import_id_fields = (
@@ -84,7 +70,10 @@ class SequencingDataResource(resources.ModelResource):
             "file_path",
         )
 
-    def before_save_instance(self, instance, using_transactions, dry_run):
+    def before_save_instance(
+        self, instance, row, **kwargs
+    ):  # pylint: disable=unused-argument, duplicate-code
+        """Set default values for the instance."""
         instance.s3_storage_class = None
         instance.created_at = date.today()
 
@@ -94,9 +83,7 @@ class SequencingDataAdmin(ImportExportModelAdmin):
 
     resource_classes = [SequencingDataResource]
 
-    inlines = [
-        SequencingDataHashInline,
-    ]
+    inlines = [SequencingDataHashInline]
 
     list_display = [
         "__str__",
@@ -111,9 +98,7 @@ class SequencingDataAdmin(ImportExportModelAdmin):
         "filename",
     ]
 
-    raw_id_fields =[
-        "sample"
-    ]
+    raw_id_fields = ["sample"]
 
     list_filter = [
         "data_location",
@@ -125,5 +110,6 @@ class SequencingDataAdmin(ImportExportModelAdmin):
         "=id",
         "assoc_packages__filename",
     ]
+
 
 admin.site.register(SequencingData, SequencingDataAdmin)

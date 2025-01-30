@@ -7,7 +7,7 @@ from import_export.admin import ImportExportModelAdmin
 from import_export.instance_loaders import CachedInstanceLoader
 from import_export.widgets import ForeignKeyWidget
 
-from genphen.models import VariantGrade, Drug
+from genphen.models import Drug, VariantGrade
 
 log = logging.getLogger("tbkb.admin")
 
@@ -51,10 +51,7 @@ class CachingForeignKeyWidget(ForeignKeyWidget):
 class VariantGradeResource(resources.ModelResource):
     """VariantGrade model import resource."""
 
-    position = fields.Field(
-        column_name="Position",
-        attribute="position"
-    )
+    position = fields.Field(column_name="Position", attribute="position")
 
     drug = fields.Field(
         column_name="Drug name",
@@ -64,14 +61,13 @@ class VariantGradeResource(resources.ModelResource):
 
     alternative_nucleotide = fields.Field(
         column_name="Alternative Nucleotide",
-        attribute="alternative_nucleotide"
+        attribute="alternative_nucleotide",
     )
 
     reference_nucleotide = fields.Field(
         column_name="Reference Nucleotide",
-        attribute="reference_nucleotide"
+        attribute="reference_nucleotide",
     )
-
 
     grade = fields.Field(column_name="Grade", attribute="grade")
     grade_version = fields.Field(column_name="Grade version", attribute="grade_version")
@@ -87,7 +83,7 @@ class VariantGradeResource(resources.ModelResource):
             "reference_nucleotide",
             "alternative_nucleotide",
             "grade",
-            "grade_version"
+            "grade_version",
         )
 
         use_bulk = True
@@ -95,7 +91,9 @@ class VariantGradeResource(resources.ModelResource):
         # force_init_instance = True
         instance_loader_class = CachedInstanceLoader
 
-    def after_import(self, dataset, result, using_transactions, dry_run, **kwargs):
+    def after_import(
+        self, dataset, result, using_transactions, dry_run, **kwargs
+    ):  # pylint: disable=W0221, E1121
         """Log successful import."""
         super().after_import(dataset, result, using_transactions, dry_run)
         if not dry_run:
@@ -125,8 +123,8 @@ class VariantGradeAdmin(ImportExportModelAdmin):
     resource_classes = [VariantGradeResource]
     skip_admin_log = True
     actions = [truncate_variant_grade]
-#    readonly_fields=('variant', "drug", "grade", "grade_version")
-    raw_id_fields = ('variant',)
+    #    readonly_fields=('variant', "drug", "grade", "grade_version")
+    raw_id_fields = ("variant",)
 
 
 admin.site.register(VariantGrade, VariantGradeAdmin)

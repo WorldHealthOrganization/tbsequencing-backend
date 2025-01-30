@@ -8,9 +8,9 @@ from genphen.models import Country
 from identity.models import User
 from submission.models import (
     Package,
+    PackageSequencingData,
     Sample,
     SampleAlias,
-    PackageSequencingData,
     SequencingData,
 )
 
@@ -18,7 +18,7 @@ from submission.models import (
 @pytest.fixture
 def new_alias_of(db):  # pylint: disable=invalid-name,unused-argument
     """Create new sample alias, create a mic and pds test for it."""
-    # pylint: disable=too-many-arguments
+
     def _new_alias_of(
         package: Package,
         name: str,
@@ -26,7 +26,9 @@ def new_alias_of(db):  # pylint: disable=invalid-name,unused-argument
         country: Country = None,
         sampling_date: DateRange = None,
         sample: Sample = None,
-    ) -> SampleAlias:
+    ) -> (
+        SampleAlias
+    ):  # pylint: disable=too-many-arguments,too-many-positional-arguments
         """Workload function."""
         return package.sample_aliases.create(
             name=name,
@@ -57,7 +59,7 @@ def new_fastq_of(db):  # pylint: disable=invalid-name,unused-argument
         )
         fastq_hash = fastq.hashes.create(
             algorithm="MD5",
-            value=md5(uuid4().bytes, usedforsecurity=False).hexdigest(), # nosec B303
+            value=md5(uuid4().bytes, usedforsecurity=False).hexdigest(),  # nosec B303
         )
         package_fastq: PackageSequencingData = PackageSequencingData.objects.create(
             package=package,

@@ -20,7 +20,7 @@ def test_validation_errors(
     drugs,
     filename,
     error_message,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # pylint: disable=unused-argument,too-many-arguments,too-many-positional-arguments
     """Raise validation error on wrong range value."""
     package = package_of(alice)
     with open(shared_datadir / filename, mode="rb") as file:
