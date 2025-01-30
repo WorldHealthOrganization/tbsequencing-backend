@@ -6,20 +6,11 @@ class VariantAdditionalInfo(models.Model):
 
     objects: models.Manager
 
+    position = models.IntegerField(null=True)
 
-    position = models.IntegerField(
-        null=True
-    )
+    alternative_nucleotide = models.CharField(null=True, max_length=200)
 
-    alternative_nucleotide = models.CharField(
-        null=True,
-        max_length=200
-    )
-
-    reference_nucleotide = models.CharField(
-        null=True,
-        max_length=200
-    )
+    reference_nucleotide = models.CharField(null=True, max_length=200)
 
     variant = models.ForeignKey(
         "Variant",

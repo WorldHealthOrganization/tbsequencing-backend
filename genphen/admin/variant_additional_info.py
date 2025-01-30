@@ -8,34 +8,31 @@ from genphen.models import VariantAdditionalInfo
 class VariantAdditionalInfoResource(resources.ModelResource):
     """VariantGrade model import resource."""
 
-    position = fields.Field(
-        column_name="Position",
-        attribute="position"
-    )
+    position = fields.Field(column_name="Position", attribute="position")
 
     alternative_nucleotide = fields.Field(
         column_name="AlternativeNucleotide",
-        attribute="alternative_nucleotide"
+        attribute="alternative_nucleotide",
     )
 
     reference_nucleotide = fields.Field(
         column_name="ReferenceNucleotide",
-        attribute="reference_nucleotide"
+        attribute="reference_nucleotide",
     )
 
-    v1_annotation = fields.Field(
-        column_name="V1",
-        attribute="v1_annotation"
-    )
-
+    v1_annotation = fields.Field(column_name="V1", attribute="v1_annotation")
 
     class Meta:
         """VariantLineageAssociationResource settings."""
 
         model = VariantAdditionalInfo
         exclude = ("id", "variant")
-        import_id_fields = ("position", "alternative_nucleotide", "reference_nucleotide", "v1_annotation")
-
+        import_id_fields = (
+            "position",
+            "alternative_nucleotide",
+            "reference_nucleotide",
+            "v1_annotation",
+        )
 
 
 class VariantAdditionalInfoAdmin(ImportExportModelAdmin):
@@ -43,6 +40,7 @@ class VariantAdditionalInfoAdmin(ImportExportModelAdmin):
 
     resource_classes = [VariantAdditionalInfoResource]
     skip_admin_log = True
-    readonly_fields=('variant',)
+    readonly_fields = ("variant",)
+
 
 admin.site.register(VariantAdditionalInfo, VariantAdditionalInfoAdmin)
