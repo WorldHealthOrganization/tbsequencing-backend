@@ -341,10 +341,10 @@ LOGGING = {
             "handlers": ["console"],
             "propagate": False,
         },
-        #Disabling logging of disallowed host errors
-        "django.security.DisallowedHost": {
-            "handlers": ["null"],
-        },
+        # #Disabling logging of disallowed host errors
+        # "django.security.DisallowedHost": {
+        #     "handlers": ["null"],
+        # },
     },
 }
 
