@@ -161,6 +161,8 @@ if IS_DEPLOYMENT_AWS:
     # this used to determine whether client request is secure
     SECURE_PROXY_SSL_HEADER = ("HTTP_CLOUDFRONT_FORWARDED_PROTO", "https")
 
+    SECURE_SSL_REDIRECT = True
+
     # django_iam_dbauth
     # Switch to IAM based DB authentication in AWS
     DATABASES["default"]["ENGINE"] = "django_iam_dbauth.aws.postgresql"
@@ -341,10 +343,6 @@ LOGGING = {
             "handlers": ["console"],
             "propagate": False,
         },
-        # #Disabling logging of disallowed host errors
-        # "django.security.DisallowedHost": {
-        #     "handlers": ["null"],
-        # },
     },
 }
 
