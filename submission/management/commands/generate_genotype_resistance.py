@@ -2,6 +2,7 @@ import random
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.db.models import Max
 
 from biosql.models import Taxon
 from genphen.models import Drug
@@ -47,6 +48,8 @@ class Command(BaseCommand):
         sample_aliases = []
         genotype_resistances = []
 
+        max_version = GenotypeResistance.objects.aggregate(Max("version"))["version__max"] or 1
+
         for i in range(num_objects):
             sample = Sample(
                 origin="NCBI",
@@ -69,6 +72,7 @@ class Command(BaseCommand):
                 drug=random.choice(drugs),
                 variant="test" + "".join(random.choices("0123456789ABCDEF", k=15)),
                 resistance_flag=random.choice(["S", "R", "I"]),
+                version=max_version,
             )
             genotype_resistances.append(genotype_resistance)
 
@@ -89,5 +93,8 @@ class Command(BaseCommand):
                 GenotypeResistance.objects.bulk_create(genotype_resistances)
 
         self.stdout.write(
-            f"Generated {num_objects} Samples, {num_objects * 6} Aliases, {num_objects} GenRes",
+            f"\nFinal count of generated records:\n"
+            f"- {num_objects} Samples\n"
+            f"- {num_objects * 6} Sample Aliases\n"
+            f"- {num_objects} Genotype Resistances",
         )
