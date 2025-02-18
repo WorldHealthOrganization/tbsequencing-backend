@@ -1,10 +1,10 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models import Count, Case, When, Value, IntegerField, Q
 from django.utils.html import format_html
 
 from fsm_admin2.admin import FSMTransitionMixin
 
-from submission.models import Package
+from submission.models import Package, Sample
 from .attachment import AttachmentInline
 from .communication import MessageInline
 from .package_stats import PackageStatsInline
@@ -99,6 +99,10 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         "get_bioproject_link"
     )
 
+    actions = [
+        "schedule_samples"
+    ]
+
     ordering = ["-state_changed_on"]
     # actions = [accept_pending_package, reject_pending_package]
     list_filter = [
@@ -155,7 +159,7 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
     @admin.display(description="BioProject ID")
     def get_bioproject_link(self, obj):
         """Get biosample link"""
-        if not obj.bioproject_id or obj.bioproject_id==-1:
+        if not obj.bioproject_id or obj.bioproject_id<0:
             return ""
         return(format_html(
             '<a href="{0}">{1}</a>',
@@ -177,6 +181,37 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         """
         return obj.samples_count
 
+
+    @admin.action(description="Schedule associated samples for bionformatic analysis.")
+    def schedule_samples(self, request, queryset):
+        count = 0
+        for obj in queryset:
+            selection = (
+                obj
+                .sample_aliases
+                .filter(
+                    Q(sample__bioanalysis_status__isnull=True)
+                    & Q(sample__ncbi_taxon_id=1773)
+                )
+                .values_list("sample")
+                .distinct()
+                .all()
+            )
+
+            print(selection, len(selection))
+            count+=len(selection)
+
+            Sample.objects.filter(pk__in=selection).update(
+                bioanalysis_status="Unprocessed"
+            )
+
+        self.message_user(
+            request,
+            f"{count} samples were scheduled for analysis.",
+            messages.SUCCESS,
+        )
+        return
+    
     @admin.display()
     def unmatched_samples_count(self, obj):
         """Show unmatched sample aliases count for a package."""
@@ -236,3 +271,16 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         actions = super().get_actions(request)
         del actions["delete_selected"]
         return actions
+
+    @admin.display()
+    def samples_left_for_processing(self, obj):
+        """Show number of samples that have been through the bioinformatic pipeline."""
+        return (
+            obj.sample_aliases
+            .filter(
+                Q(sample__bioanalysis_status__isnull=True)
+            )
+            .values("sample")
+            .distinct()
+            .count()
+        )
