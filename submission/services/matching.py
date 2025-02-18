@@ -1,5 +1,4 @@
 import re
-
 from contextlib import contextmanager
 
 from django.db import DatabaseError
@@ -11,10 +10,11 @@ from biosql.models import Taxon
 from submission.models import (
     Package,
     PackageSequencingData,
-    SampleAlias,
     Sample,
+    SampleAlias,
     SequencingData,
 )
+
 from . import Service
 
 
@@ -40,9 +40,7 @@ class MatchingService(Service):
             # don't wait for existing lock to release
             # don't replace cleaned_data[package] to have original object updated
             self.cleaned_data["_package_locked"] = (
-                Package.objects.editable()
-                .select_for_update(nowait=True)
-                .get(pk=package.pk)
+                Package.objects.editable().select_for_update(nowait=True).get(pk=package.pk)
             )
         except DatabaseError as exc:  # package is already locked
             raise PermissionDenied("Package is already being processed") from exc
@@ -54,6 +52,16 @@ class MatchingService(Service):
         # finally, mark package as matched and save
         package.matching_state = package.MatchingState.MATCHED
         package.save()
+
+    def validate(self):
+        """Validate input package state and data."""
+        package: Package = self.cleaned_data["package"]
+
+        # Check if there's any data at all
+        fastqs_cnt = package.sequencing_datas.count()
+        aliases_cnt = package.sample_aliases.count()
+        if not fastqs_cnt and not aliases_cnt:
+            raise ValidationError("Package has no data")
 
     def process(self):
         """
@@ -75,6 +83,7 @@ class MatchingService(Service):
             - among user aliases, submitted earlier and approved, also in alias name
         """
         with self.lock_package():
+            self.validate()
             self.perform_match()
 
     def reset_match_state(self, package: Package):
@@ -96,12 +105,6 @@ class MatchingService(Service):
     def perform_match(self):
         """Perform matching procedure."""
         package: Package = self.cleaned_data["package"]
-
-        # check, if there's any data at all
-        fastqs_cnt = package.sequencing_datas.count()
-        aliases_cnt = package.sample_aliases.count()
-        if not fastqs_cnt and not aliases_cnt:
-            raise ValidationError("Package has no data")
 
         # remove previous run results
         self.reset_match_state(package)
@@ -138,7 +141,6 @@ class MatchingService(Service):
         for alias in unmatched_no_prefix:
             self.match_alias_by_prefix_or_sample_id(alias, prefix="name")
 
-
         # Step 3: mark all that left unmatched
         package.sample_aliases.filter(match_source__isnull=True).update(
             match_source=SampleAlias.MatchSource.NO_MATCH,
@@ -168,8 +170,13 @@ class MatchingService(Service):
         """
         package: Package = self.cleaned_data["package"]
 
+        prefix_value = getattr(alias, prefix)
+        if not prefix_value:
+            alias.add_verdict(f"No {prefix} provided", alias.VerdictLevel.WARNING)
+            return
+
         prefix_fastq_group = package.assoc_sequencing_datas.by_prefix(
-            getattr(alias, prefix) + self.SAMPLE_PREFIX_DELIMITER,
+            prefix_value + self.SAMPLE_PREFIX_DELIMITER,
         )
 
         if not prefix_fastq_group.exists():
@@ -272,15 +279,17 @@ class MatchingService(Service):
         """
         Match sample aliases, which name follows NCBI naming patterns, by name.
 
-        Mark such aliases as not matched if no match found at that stage.
+        Mark such aliases as not matched if:
+        - No match found
+        - BioSample found but has no SRA data yet
         """
         biosample_origin_q = Sample.objects.filter(
-            aliases__origin="BioSample",
+            aliases__origin=SampleAlias.Origin.BIOSAMPLE,
             aliases__name__iexact=alias.name,
         ).order_by("-aliases__created_at")
 
         srs_origin_q = Sample.objects.filter(
-            aliases__origin="SRS",
+            aliases__origin=SampleAlias.Origin.SRS,
             aliases__name__iexact=alias.name,
         ).order_by("-aliases__created_at")
 
@@ -317,6 +326,15 @@ class MatchingService(Service):
                     alias.match_source = SampleAlias.MatchSource.NO_MATCH
                     alias.save()
                     return
+
+                # Run additional validation
+                if not matched_sample.sequencing_data_set.exists():
+                    alias.add_verdict(
+                        "NCBI Sample was recognized, but it has no SRA data",
+                        alias.VerdictLevel.WARNING,
+                    )
+                    alias.save()
+
                 self.associate_sample_and_alias(matched_sample, alias, match_source)
                 return
 
