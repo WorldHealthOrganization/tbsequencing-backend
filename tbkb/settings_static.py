@@ -61,9 +61,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-SECURE_HSTS_SECONDS = 3600
-
-SECURE_SSL_REDIRECT = True
 
 ROOT_URLCONF = "tbkb.urls"
 
