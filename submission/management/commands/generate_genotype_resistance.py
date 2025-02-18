@@ -39,7 +39,7 @@ class Command(BaseCommand):
 
         # Ensure Package exists
         package, _ = Package.objects.get_or_create(
-            pk=9,
+            pk=1,
             defaults={"name": "test Default Package", "description": "Generated package"},
         )
 

@@ -11,6 +11,7 @@ class GenotypeResistanceFilter(filters.FilterSet):
     sample_aliases_name = filters.CharFilter(
         field_name="sample__aliases__name",
         lookup_expr="icontains",
+        distinct=True,
     )
     drug = filters.BaseInFilter(field_name="drug", lookup_expr="in")
     variant = filters.CharFilter(lookup_expr="icontains")
