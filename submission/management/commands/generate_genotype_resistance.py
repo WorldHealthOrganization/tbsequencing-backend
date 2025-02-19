@@ -52,20 +52,20 @@ class Command(BaseCommand):
 
         for i in range(num_objects):
             sample = Sample(
-                origin="NCBI",
+                origin=Sample.Origin.NCBI,
                 ncbi_taxon=taxon,
                 isolation_source="test",
             )
             samples.append(sample)
 
-            for _ in range(6):
-                sample_alias = SampleAlias(
-                    sample=sample,
-                    origin="BioSample",
-                    name="test" + "".join(random.choices("0123456789ABCDEF", k=15)),
-                    package=package,
-                )
-                sample_aliases.append(sample_alias)
+            sample_alias = SampleAlias(
+                sample=sample,
+                origin=SampleAlias.Origin.BIOSAMPLE,
+                origin_label=Sample.SAMPLE_NAME,
+                name="test" + "".join(random.choices("0123456789ABCDEF", k=15)),
+                package=package,
+            )
+            sample_aliases.append(sample_alias)
 
             genotype_resistance = GenotypeResistance(
                 sample=sample,
@@ -95,6 +95,6 @@ class Command(BaseCommand):
         self.stdout.write(
             f"\nFinal count of generated records:\n"
             f"- {num_objects} Samples\n"
-            f"- {num_objects * 6} Sample Aliases\n"
+            f"- {num_objects} Sample Aliases\n"
             f"- {num_objects} Genotype Resistances",
         )

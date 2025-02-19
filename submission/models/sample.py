@@ -61,6 +61,8 @@ class Sample(models.Model):
         TBKB = "TbKb"
         ADMIN = "Admin"
 
+    SAMPLE_NAME = "Sample name"
+
     bioanalysis_status = models.CharField(
         max_length=50,
         null=True,
@@ -117,7 +119,10 @@ class Sample(models.Model):
             return ""
 
         biosample_name = (
-            self.aliases.filter(origin="BioSample").filter(origin_label="Sample name").first().name
+            self.aliases.filter(origin=self.Origin.BIOSAMPLE)
+            .filter(origin_label=self.SAMPLE_NAME)
+            .first()
+            .name
         )
 
         address = ""
