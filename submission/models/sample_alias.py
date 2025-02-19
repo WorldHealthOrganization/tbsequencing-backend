@@ -96,7 +96,7 @@ class SampleAlias(VerdictMixin):
         default=Origin.TBKB,  # that default is only for django
         db_index=True,
     )
-    origin_label = models.CharField(max_length=1024, default="")
+    origin_label = models.CharField(max_length=1024, default="", db_index=True)
 
     # Backrefs
     mic_tests: Any  # RelatedManager[MICTest]

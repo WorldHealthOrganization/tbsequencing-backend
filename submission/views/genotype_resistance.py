@@ -24,7 +24,10 @@ class GenotypeResistanceViewSet(
         """Get queryset."""
         sample_alias_prefetch = Prefetch(
             "sample__aliases",
-            queryset=SampleAlias.objects.filter(origin=SampleAlias.Origin.BIOSAMPLE).order_by("id"),
+            queryset=SampleAlias.objects.filter(
+                origin=SampleAlias.Origin.BIOSAMPLE,
+                origin_label=Sample.SAMPLE_NAME,
+            ).order_by("id"),
             to_attr="filtered_aliases",
         )
 
