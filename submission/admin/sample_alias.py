@@ -45,9 +45,9 @@ class SampleAliasResource(resources.ModelResource):
             "origin_label",
         )
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         """Initialize the package field."""
-        super().__init__()
+        super().__init__(**kwargs)
         self.package = None
 
     def before_import(self, dataset, **kwargs):  # pylint: disable=unused-argument, duplicate-code
@@ -68,9 +68,7 @@ class SampleAliasResource(resources.ModelResource):
 
         package.save()
 
-    def before_save_instance(
-        self, instance, row, **kwargs
-    ):  # pylint: disable=unused-argument, duplicate-code
+    def before_save_instance(self, instance, row, **kwargs):  # pylint: disable=unused-argument, duplicate-code
         """Set the package and created_at fields for the imported samples."""
         instance.package = self.package
         instance.created_at = date.today()
@@ -83,7 +81,6 @@ class SampleAliasAdmin(ImportExportModelAdmin):
 
     raw_id_fields = [
         "sample",
-        #     "assoc_packages",
     ]
 
     search_fields = [
