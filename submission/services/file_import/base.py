@@ -183,7 +183,7 @@ class PackageFileImportService(Service, metaclass=ABCMeta):
         try:
             dupe_cols = [col for col in dataframe.columns if col.endswith(".1")]
         except AttributeError as exc:
-            raise ValidationError("Not all columns names are sting.") from exc
+            raise ValidationError("Not all columns names are string.") from exc
 
         if dupe_cols:
             # Column names should be unique
