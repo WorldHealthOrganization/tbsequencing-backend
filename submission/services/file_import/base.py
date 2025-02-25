@@ -180,7 +180,11 @@ class PackageFileImportService(Service, metaclass=ABCMeta):
 
         dataframe.columns = dataframe.columns.str.strip()
 
-        dupe_cols = [col for col in dataframe.columns if col.endswith(".1")]
+        try:
+            dupe_cols = [col for col in dataframe.columns if col.endswith(".1")]
+        except AttributeError as exc:
+            raise ValidationError("Not all columns names are sting.") from exc
+
         if dupe_cols:
             # Column names should be unique
             # This check relies on mangle_dupe_cols=True when reading table
@@ -199,10 +203,7 @@ class PackageFileImportService(Service, metaclass=ABCMeta):
             # since we have all types as strings here,
             # we can check empty and whitespace values like that
             empty_values = ~dataframe[mandatory_col].str.strip().astype(bool)
-            if (
-                mandatory_col in self.NON_NULL_COLUMNS
-                and not dataframe[empty_values].empty
-            ):
+            if mandatory_col in self.NON_NULL_COLUMNS and not dataframe[empty_values].empty:
                 raise ValidationError(
                     f"{mandatory_col}: Empty values in mandatory column.",
                 )
@@ -229,9 +230,7 @@ class PackageFileImportService(Service, metaclass=ABCMeta):
             "sample_id": row["Sample Id"],
             "medium": row["DST Method"],
             "fastq_prefix": (
-                row["FASTQ prefix"].strip().rstrip("_")
-                if row.get("FASTQ prefix")
-                else None
+                row["FASTQ prefix"].strip().rstrip("_") if row.get("FASTQ prefix") else None
             ),
             "tests": [],
             "metadata": {},
