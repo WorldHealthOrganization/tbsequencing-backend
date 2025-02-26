@@ -172,6 +172,12 @@ if IS_DEPLOYMENT_AWS:
     # assuming, that https will be only used in AWS
     ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_BROWSER_XSS_FILTER = True
+
 
 #
 # Email setup
