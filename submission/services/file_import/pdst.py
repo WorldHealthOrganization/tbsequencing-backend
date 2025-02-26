@@ -103,7 +103,7 @@ class PackageFilePDSTImportService(PackageFileImportService):
     SHEET_NAME = "PDST"
 
     COLNAME_REGEX = re.compile(
-        r"^([\w\-\/]+)\s*?(?:\(\s*?(?:(\d+(?:[.,]\d+)?)(?:\s*mg/L)?|CC)\s*?\))?$",
+        r"^([A-Za-z0-9\-\/]+)\s*?(?:\(\s*?(?:(\d+(?:[.,]\d+)?)(?:\s*mg/L)?|CC)\s*?\))?$",
     )
 
     def __init__(self, *args, **kwargs):
@@ -230,9 +230,7 @@ class PackageFilePDSTImportService(PackageFileImportService):
             row: PDSTRow = self.parse_row(raw)
 
             self.not_used_columns = (
-                list(row.metadata.keys())
-                if not self.not_used_columns
-                else self.not_used_columns
+                list(row.metadata.keys()) if not self.not_used_columns else self.not_used_columns
             )
 
             if row.sample_id in existing_aliases:
