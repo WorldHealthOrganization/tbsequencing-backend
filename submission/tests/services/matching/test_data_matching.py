@@ -24,7 +24,7 @@ def test_new_sample_created_from_alias(
     new_fastq_of,
     countries,
 ):  # pylint: disable=unused-argument
-    """When new alias matched with new fastq by prefix, new sample is created from the alias."""
+    """When new alias matched with new fastq by prefix."""
     package = package_of(alice)
     country = Country.objects.get(pk="ABW")
     alias = new_alias_of(
@@ -54,6 +54,7 @@ def test_new_sample_created_from_alias(
     assert fastq1.sequencing_data.sample == alias.sample
     assert fastq2.sequencing_data.sample == alias.sample
 
+
 def test_new_sample_created_from_alias_no_fastq_prefix(
     package_of,
     alice,
@@ -61,7 +62,7 @@ def test_new_sample_created_from_alias_no_fastq_prefix(
     new_fastq_of,
     countries,
 ):  # pylint: disable=unused-argument
-    """When new alias matched with new fastq by prefix, new sample is created from the alias."""
+    """When new alias matched with new fastq by prefix."""
     package = package_of(alice)
     country = Country.objects.get(pk="ABW")
     alias = new_alias_of(
@@ -90,6 +91,7 @@ def test_new_sample_created_from_alias_no_fastq_prefix(
     # fastq are linked to same sample that the alias
     assert fastq1.sequencing_data.sample == alias.sample
     assert fastq2.sequencing_data.sample == alias.sample
+
 
 def test_new_sample_no_fastq_by_prefix_interrupted(
     package_of,
@@ -218,7 +220,7 @@ def test_mic_pds_tests_associated_with_sample_when_matched(
     assert alias.sample == sample
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable=too-many-arguments, too-many-positional-arguments
 @pytest.mark.parametrize("origin", ("NCBI", "SRA"))
 def test_match_alias_by_name_among_ncbi_aliases(
     new_package_of,

@@ -1,1 +1,1 @@
-"""Serializers for REST API submission."""
+from .genotype_resistance import GenotypeResistanceSerializer  # noqa: F401

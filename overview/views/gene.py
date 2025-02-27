@@ -3,10 +3,11 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from common.paginations import PageSizePageNumberPagination
+
 from ..filters import GeneSearchFilter
 from ..models import Gene
-from ..paginations import PageSizePageNumberPagination
-from ..serializers import GeneSerializer, GeneRetrieveSerializer
+from ..serializers import GeneRetrieveSerializer, GeneSerializer
 
 
 class GeneViewSet(

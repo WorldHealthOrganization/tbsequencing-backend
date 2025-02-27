@@ -1,14 +1,13 @@
 from datetime import date
-from dateutil import parser
 
 import pytest
+from dateutil import parser
 from django.core.files import File
 from psycopg2.extras import DateRange
 
-from genphen.models import PDSAssessmentMethod, GrowthMedium
-from submission.models import SampleAlias, Attachment
+from genphen.models import GrowthMedium, PDSAssessmentMethod
+from submission.models import Attachment, SampleAlias
 from submission.services.file_import import PackageFilePDSTImportService
-
 
 FILE_VALID = "pdst1__valid.xlsx"
 FILE_VALID_2 = "pdst2__valid.xlsx"
@@ -40,7 +39,7 @@ def test_new_sample_has_sampling_date(
     sample_name,
     start,
     end,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # pylint: disable=unused-argument,too-many-arguments,too-many-positional-arguments
     """New sample has sampling date specified from YoI."""
     package = package_of(alice)
     with open(shared_datadir / filename, mode="rb") as file:
@@ -55,16 +54,13 @@ def test_new_sample_has_sampling_date(
     assert sampling_date == DateRange(
         lower=parser.parse(start).date(),
         upper=parser.parse(end).date(),
-        bounds="[)"
+        bounds="[)",
     )
-
 
 
 @pytest.mark.parametrize(
     "filename,sample_name,medium,method",
-    (
-        (FILE_VALID_2, "901", "LJ", "Resistance Ratio"),
-    ),
+    ((FILE_VALID_2, "901", "LJ", "Resistance Ratio"),),
 )
 def test_sample_has_assessment_method(
     package_of,
@@ -78,7 +74,7 @@ def test_sample_has_assessment_method(
     sample_name,
     medium,
     method,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # pylint: disable=unused-argument,too-many-arguments,too-many-positional-arguments
     """New sample has country specified."""
     with open(shared_datadir / filename, mode="rb") as file:
         PackageFilePDSTImportService().execute(
@@ -92,6 +88,7 @@ def test_sample_has_assessment_method(
     assesment = PDSAssessmentMethod.objects.filter(method_name=method).get()
     print(assesment)
     assert test.method == assesment
+
 
 @pytest.mark.parametrize(
     "filename,sample_name,tests_cnt",
@@ -113,7 +110,7 @@ def test_new_sample_marked_as_created_within_package(
     filename,
     sample_name,
     tests_cnt,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # pylint: disable=unused-argument,too-many-arguments,too-many-positional-arguments
     """New sample has "created within the package" mark inside its package m2m membership."""
     with open(shared_datadir / filename, mode="rb") as file:
         PackageFilePDSTImportService().execute(
@@ -121,9 +118,7 @@ def test_new_sample_marked_as_created_within_package(
             dict(file=File(file)),
         )
 
-    sample_alias: SampleAlias = (
-        package_of(alice).sample_aliases.filter(name=sample_name).get()
-    )
+    sample_alias: SampleAlias = package_of(alice).sample_aliases.filter(name=sample_name).get()
     assert sample_alias.pds_tests.count() == tests_cnt
 
 
@@ -144,7 +139,7 @@ def test_imported_tests_count(
     countries,
     filename,
     test_count,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # pylint: disable=unused-argument,too-many-arguments,too-many-positional-arguments
     """Imported file tests count match actual."""
     with open(shared_datadir / filename, mode="rb") as file:
         PackageFilePDSTImportService().execute(
@@ -199,7 +194,7 @@ def test_alias_inherits_country_and_yoi(
     drugs,
     growth_mediums,
     countries,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # pylint: disable=unused-argument,too-many-arguments,too-many-positional-arguments
     """Existing alias inherits country and year of isolation."""
     existing_alias = new_alias_of(package_of(alice), "STRAIN1")
 
@@ -258,7 +253,7 @@ def test_attachment_created_after_import(
     drugs,
     growth_mediums,
     countries,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # pylint: disable=unused-argument,too-many-arguments,too-many-positional-arguments
     """Attachment created on successful excel upload."""
     with open(shared_datadir / FILE_VALID, "rb") as file:
         PackageFilePDSTImportService().execute(

@@ -23,7 +23,7 @@ def test_upload_valid(
     growth_mediums,
     countries,
     assessment_methods,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # pylint: disable=unused-argument,too-many-arguments,too-many-positional-arguments
     """Successful upload redirects back to endpoint."""
     endpoint = reverse("v1:submission:pdstest-list", (package_of(alice).pk,))
 

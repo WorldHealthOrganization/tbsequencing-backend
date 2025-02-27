@@ -45,6 +45,7 @@ watchtower = "*"
 psycopg2-binary = "*"
 numpy = "==1.26.4"
 isort = "*"
+ruff = "*"
 
 [dev-packages]
 pre-commit = "*"

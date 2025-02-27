@@ -11,7 +11,7 @@ def test_successful_upload_redirects_back(
     util,
     drugs,
     countries,
-):  # pylint: disable=unused-argument,too-many-arguments
+):  # pylint: disable=unused-argument,too-many-arguments,too-many-positional-arguments
     """Successful upload redirects back to endpoint."""
     endpoint = reverse("v1:submission:mictest-list", (package_of(alice).pk,))
     with open(shared_datadir / MIC_VALID, "rb") as file:

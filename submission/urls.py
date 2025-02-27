@@ -34,6 +34,11 @@ package_router.register(
     views.PackageSampleAliasesViewSet,
     basename="samplealias",
 )
+router.register(
+    r"genotype-resistance",
+    views.GenotypeResistanceViewSet,
+    basename="genotype-resistance",
+)
 
 urlpatterns = [
     path("", include(router.urls)),
