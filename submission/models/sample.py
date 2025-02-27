@@ -146,7 +146,7 @@ class Sample(models.Model):
             return ""
         return format_html(
             '<a href="{0}">{1}</a>',
-            "https://www.ncbi.nlm.gov/biosample/" + str(self.biosample_id),
+            "https://www.ncbi.nlm.nih.gov/biosample/" + str(self.biosample_id),
             self.biosample_id,
         )
 
