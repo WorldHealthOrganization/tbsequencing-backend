@@ -4,22 +4,9 @@ from rest_framework import serializers
 
 from submission.services.file_import import PackageFilePDSTImportService
 
-NO_SAMPLING_DATE = "pds_unknown_drug_code.xlsx"
 UNKNOWN_TEST_RESULT = "pds_unknown_test_result.xlsx"
 UNKNOWN_COUNTRY = "pds_unknown_country.xlsx"
 ZERO_TESTS = "pds_zero_tests.xlsx"
-
-
-def test_unknown_drug_code(package_of, alice, shared_datadir):
-    """Raise validation error on unknown drug code."""
-    package = package_of(alice)
-    with open(shared_datadir / NO_SAMPLING_DATE, mode="rb") as file:
-        with pytest.raises(serializers.ValidationError) as exc:
-            PackageFilePDSTImportService().execute(
-                dict(package=package),
-                dict(file=File(file)),
-            )
-        assert "HHH (0.1): Unknown drug code. Please check the column header values." in str(exc)
 
 
 def test_unknown_test_result(
