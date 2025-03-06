@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from unittest.mock import patch
 
 import botocore.session
@@ -306,9 +306,7 @@ def new_sample(db):  # pylint: disable=invalid-name,unused-argument
         """Actual function."""
         return Sample.objects.create(
             ncbi_taxon=Taxon.objects.first(),
-            sampling_date=DateRange(date(yoi, 1, 1), date(yoi, 12, 31))
-            if yoi
-            else None,
+            sampling_date=DateRange(date(yoi, 1, 1), date(yoi, 12, 31)) if yoi else None,
             country=country,
         )
 
