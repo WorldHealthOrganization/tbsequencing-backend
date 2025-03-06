@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('submission', '0015_alter_genotyperesistance_version_alter_sample_origin_and_more'),
+        ("submission", "0016_alter_samplealias_origin_label"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='samplealias',
-            name='name',
+            model_name="samplealias",
+            name="name",
             field=models.CharField(db_index=True, max_length=2048),
         ),
     ]
