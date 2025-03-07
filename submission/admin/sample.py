@@ -61,9 +61,7 @@ class SampleResource(resources.ModelResource):
 
         import_id_fields = ("biosample_id",)
 
-    def before_import(
-        self, dataset, **kwargs
-    ):  # pylint: disable=unused-argument, duplicate-code
+    def before_import(self, dataset, **kwargs):  # pylint: disable=unused-argument, duplicate-code
         """Create a package for the imported samples."""
         package_name = "Django package created from file uploaded via the admin panel"
 
@@ -82,9 +80,7 @@ class SampleResource(resources.ModelResource):
 
         package.save()
 
-    def before_save_instance(
-        self, instance, row, **kwargs
-    ):  # pylint: disable=unused-argument, duplicate-code
+    def before_save_instance(self, instance, row, **kwargs):  # pylint: disable=unused-argument, duplicate-code
         """Set the package and created_at fields for the imported samples."""
         instance.package = self.package
         instance.origin = "Admin"
@@ -122,6 +118,16 @@ class SampleAdmin(ImportExportModelAdmin):
         "origin",
     ]
 
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        """
+        Customize the form for the Sample model.
+
+        The widget is set to a width of 250 pixels.
+        """
+        form = super().get_form(request, obj, change, **kwargs)
+        form.base_fields["biosample_id"].widget.attrs["style"] = "width: 250px"
+        return form
+
     inlines = [
         SampleAliasInline,
         PhenotypicDrugSusceptibilityTestInline,
@@ -142,8 +148,7 @@ class SampleAdmin(ImportExportModelAdmin):
             )
             deleted_objects.extend([str(x) for x in obj.aliases.filter(sample=obj)])
             model_count["Sample aliass"] = (
-                model_count.get("Sample aliass", 0)
-                + obj.aliases.filter(sample=obj).count()
+                model_count.get("Sample aliass", 0) + obj.aliases.filter(sample=obj).count()
             )
             model_count["Sequencing data"] = (
                 model_count.get("Sequencing data", 0)
