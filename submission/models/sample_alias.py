@@ -52,7 +52,7 @@ class SampleAlias(VerdictMixin):
         TBKB = "TBKB"  # comes from webapp
 
     # Columns
-    name = models.CharField(max_length=2048, db_index=True)
+    name = models.CharField(max_length=2048)
     created_at = models.DateTimeField(auto_now_add=True)
     fastq_prefix = models.CharField(max_length=2048, null=True)
     """
