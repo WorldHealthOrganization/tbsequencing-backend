@@ -148,7 +148,8 @@ class SampleAdmin(ImportExportModelAdmin):
             )
             deleted_objects.extend([str(x) for x in obj.aliases.filter(sample=obj)])
             model_count["Sample aliass"] = (
-                model_count.get("Sample aliass", 0) + obj.aliases.filter(sample=obj).count()
+                model_count.get("Sample aliass", 0)
+                + obj.aliases.filter(sample=obj).count()
             )
             model_count["Sequencing data"] = (
                 model_count.get("Sequencing data", 0)

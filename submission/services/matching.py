@@ -27,6 +27,7 @@ class MatchingService(Service):
     """Package in a DRAFT|REJECTED state."""
 
     BIOSAMPLE_ORIGIN_PATTERN = re.compile(r"^SAM(N|EA)\d+$", re.IGNORECASE)
+    CNCB_ORIGIN_PATTERN = re.compile(r"^SAMC\d+$", re.IGNORECASE)
     SRS_ORIGIN_PATTERN = re.compile(r"^[ES]RS\d+$", re.IGNORECASE)
     LIBRARY_NAME_PATTERN = re.compile(r"^[SED]RR\d+$", re.IGNORECASE)
 
@@ -288,6 +289,11 @@ class MatchingService(Service):
             aliases__name__iexact=alias.name,
         ).order_by("-aliases__created_at")
 
+        cncb_origin_q = Sample.objects.filter(
+            aliases__origin="CNCB",
+            aliases__name__iexact=alias.name,
+        ).order_by("-aliases__created_at")
+
         srs_origin_q = Sample.objects.filter(
             aliases__origin=SampleAlias.Origin.SRS,
             aliases__name__iexact=alias.name,
@@ -301,6 +307,11 @@ class MatchingService(Service):
             (
                 self.BIOSAMPLE_ORIGIN_PATTERN,
                 biosample_origin_q,
+                SampleAlias.MatchSource.NCBI,
+            ),
+            (
+                self.CNCB_ORIGIN_PATTERN,
+                cncb_origin_q,
                 SampleAlias.MatchSource.NCBI,
             ),
             (
