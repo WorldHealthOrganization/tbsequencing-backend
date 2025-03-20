@@ -35,9 +35,9 @@ package_router.register(
     basename="samplealias",
 )
 router.register(
-    r"genotype-resistance",
+    r"biosample-search",
     views.GenotypeResistanceViewSet,
-    basename="genotype-resistance",
+    basename="biosample-search",
 )
 
 urlpatterns = [
