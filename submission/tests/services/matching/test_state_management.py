@@ -11,8 +11,8 @@ from submission.services.matching import MatchingService
 @pytest.mark.django_db(transaction=True)
 def test_package_being_locked_while_matching(
     package_of,
+    new_fastq_of,
     alice,
-    countries,
     mocker: MockerFixture,
     start_race,
 ):  # pylint: disable=unused-argument
@@ -22,6 +22,7 @@ def test_package_being_locked_while_matching(
     The test make use of database transactions.
     """
     package = package_of(alice)
+    new_fastq_of(package, uploaded_filename="12345_file1.fastq.gz")
 
     # make our match procedure to take "forever" to complete
     MatchingService.perform_match = mocker.MagicMock(
