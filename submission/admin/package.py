@@ -193,11 +193,12 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
     def processed_samples_count(self, obj):
         """Show number of samples that have been through the bioinformatic pipeline."""
         return (
-            obj.samples
+            obj.sample_aliases
             .filter(
-                Q(bioanalysis_status="Annotated")
-                & Q(bioanalysis_status__isnull=False)
+                Q(sample__bioanalysis_status="Annotated")
+                & Q(sample__bioanalysis_status__isnull=False)
             )
+            .values("sample")
             .distinct()
             .count()
         )
