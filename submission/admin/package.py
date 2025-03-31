@@ -11,13 +11,13 @@ from .package_stats import PackageStatsInline
 from .package_sequencing_data_inline import PackageSequencingDataInline
 from .contributor import ContributorInline
 
-@admin.action(description="Schedule associated samples for bionformatic analysis.")
-def make_published(modeladmin, request, queryset):
-    for obj in queryset:
-        selection = obj.samples.filter(
-            Q(samples_bioanalysis_status_isnull)
-        )
-        print(selection)
+# @admin.action(description="Schedule associated samples for bionformatic analysis.")
+# def make_published(modeladmin, request, queryset):
+#     for obj in queryset:
+#         selection = obj.samples.filter(
+#             Q(samples_bioanalysis_status_isnull)
+#         )
+#         print(selection)
 
 class PackageOriginListFilter(admin.SimpleListFilter):
     """Custom admin filter, showing packages by their origin."""
@@ -120,7 +120,7 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         "name"
     ]
 
-    actions = [make_published]
+    # actions = [make_published]
 
 
     # def get_fields(self, request, obj=None):
@@ -192,7 +192,15 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
     @admin.display()
     def processed_samples_count(self, obj):
         """Show number of samples that have been through the bioinformatic pipeline."""
-        return obj.sample.filter(sample__bioanalysis_status="Annotated").count()
+        return (
+            obj.samples
+            .filter(
+                Q(bioanalysis_status="Annotated")
+                & Q(bioanalysis_status__isnull=False)
+            )
+            .distinct()
+            .count()
+        )
 
     @admin.display()
     def unmatched_samples_count(self, obj):
