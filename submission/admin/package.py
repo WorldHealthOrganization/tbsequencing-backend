@@ -11,6 +11,14 @@ from .package_stats import PackageStatsInline
 from .package_sequencing_data_inline import PackageSequencingDataInline
 from .contributor import ContributorInline
 
+@admin.action(description="Schedule associated samples for bionformatic analysis.")
+def make_published(modeladmin, request, queryset):
+    for obj in queryset:
+        selection = obj.samples.filter(
+            Q(samples_bioanalysis_status_isnull)
+        )
+        print(selection)
+
 class PackageOriginListFilter(admin.SimpleListFilter):
     """Custom admin filter, showing packages by their origin."""
 
@@ -94,6 +102,7 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         "unmatched_samples_count",
         "unmatched_mic_tests_count",
         "unmatched_pds_tests_count",
+        "processed_samples_count",
         "rejection_reason",
         "samples_with_pdst_from_any_packages",
         "get_bioproject_link"
@@ -110,6 +119,9 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
     search_fields = [
         "name"
     ]
+
+    actions = [make_published]
+
 
     # def get_fields(self, request, obj=None):
     #     if obj.origin=="NCBI":
@@ -155,7 +167,7 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
     @admin.display(description="BioProject ID")
     def get_bioproject_link(self, obj):
         """Get biosample link"""
-        if not obj.bioproject_id or obj.bioproject_id==-1:
+        if not obj.bioproject_id or obj.bioproject_id<0:
             return ""
         return(format_html(
             '<a href="{0}">{1}</a>',
@@ -176,6 +188,11 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         making it easier for DB to handle.
         """
         return obj.samples_count
+
+    @admin.display()
+    def processed_samples_count(self, obj):
+        """Show number of samples that have been through the bioinformatic pipeline."""
+        return obj.sample.filter(sample__bioanalysis_status="Annotated").count()
 
     @admin.display()
     def unmatched_samples_count(self, obj):
@@ -236,3 +253,4 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         actions = super().get_actions(request)
         del actions["delete_selected"]
         return actions
+
