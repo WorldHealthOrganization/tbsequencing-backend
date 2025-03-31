@@ -102,7 +102,7 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         "unmatched_samples_count",
         "unmatched_mic_tests_count",
         "unmatched_pds_tests_count",
-        "processed_samples_count",
+        "samples_left_for_processing",
         "rejection_reason",
         "samples_with_pdst_from_any_packages",
         "get_bioproject_link"
@@ -190,13 +190,12 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         return obj.samples_count
 
     @admin.display()
-    def processed_samples_count(self, obj):
+    def samples_left_for_processing(self, obj):
         """Show number of samples that have been through the bioinformatic pipeline."""
         return (
             obj.sample_aliases
             .filter(
-                Q(sample__bioanalysis_status="Annotated")
-                & Q(sample__bioanalysis_status__isnull=False)
+                Q(sample__bioanalysis_status__isnull=True)
             )
             .values("sample")
             .distinct()
