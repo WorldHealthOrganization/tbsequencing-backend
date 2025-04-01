@@ -1,23 +1,16 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models import Count, Case, When, Value, IntegerField, Q
 from django.utils.html import format_html
 
 from fsm_admin2.admin import FSMTransitionMixin
 
-from submission.models import Package
+from submission.models import Package, Sample
 from .attachment import AttachmentInline
 from .communication import MessageInline
 from .package_stats import PackageStatsInline
 from .package_sequencing_data_inline import PackageSequencingDataInline
 from .contributor import ContributorInline
 
-# @admin.action(description="Schedule associated samples for bionformatic analysis.")
-# def make_published(modeladmin, request, queryset):
-#     for obj in queryset:
-#         selection = obj.samples.filter(
-#             Q(samples_bioanalysis_status_isnull)
-#         )
-#         print(selection)
 
 class PackageOriginListFilter(admin.SimpleListFilter):
     """Custom admin filter, showing packages by their origin."""
@@ -99,10 +92,10 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         "description",
         "matching_state",
         "samples_count",
+        "samples_left_for_processing",
         "unmatched_samples_count",
         "unmatched_mic_tests_count",
         "unmatched_pds_tests_count",
-        "samples_left_for_processing",
         "rejection_reason",
         "samples_with_pdst_from_any_packages",
         "get_bioproject_link"
@@ -120,7 +113,9 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         "name"
     ]
 
-    # actions = [make_published]
+    actions = [
+        "schedule_samples"
+    ]
 
 
     # def get_fields(self, request, obj=None):
@@ -163,6 +158,38 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         )
 
         return query
+
+
+
+    @admin.action(description="Schedule associated samples for bionformatic analysis.")
+    def schedule_samples(self, request, queryset):
+        count = 0
+        for obj in queryset:
+            selection = (
+                obj
+                .sample_aliases
+                .filter(
+                    Q(sample__bioanalysis_status__isnull=True)
+                    & Q(sample__ncbi_taxon_id=1773)
+                )
+                .values_list("sample")
+                .distinct()
+                .all()
+            )
+
+            print(selection, len(selection))
+            count+=len(selection)
+
+            Sample.objects.filter(pk__in=selection).update(
+                bioanalysis_status="Unprocessed"
+            )
+            
+        self.message_user(
+            request,
+            f"{count} samples were scheduled for analysis.",
+            messages.SUCCESS,
+        )
+        return
 
     @admin.display(description="BioProject ID")
     def get_bioproject_link(self, obj):
