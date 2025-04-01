@@ -280,6 +280,8 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
             obj.sample_aliases
             .filter(
                 Q(sample__bioanalysis_status__isnull=True)
+                & Q(sample__ncbi_taxon_id=1773)
+
             )
             .values("sample")
             .distinct()

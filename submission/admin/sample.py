@@ -117,9 +117,9 @@ class SampleAdmin(ImportExportModelAdmin):
     search_fields = ["aliases__name", "=id", "=biosample_id"]
 
     list_filter = [
-        "country",
         "bioanalysis_status",
         "origin",
+        "country",
     ]
 
     inlines = [
