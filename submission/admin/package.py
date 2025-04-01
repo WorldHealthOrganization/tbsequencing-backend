@@ -91,6 +91,7 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         "description",
         "matching_state",
         "samples_count",
+        "samples_left_for_processing",
         "unmatched_samples_count",
         "unmatched_mic_tests_count",
         "unmatched_pds_tests_count",
@@ -274,7 +275,7 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
 
     @admin.display()
     def samples_left_for_processing(self, obj):
-        """Show number of samples that have been through the bioinformatic pipeline."""
+        """Show number of samples that have not been through the bioinformatic pipeline."""
         return (
             obj.sample_aliases
             .filter(
