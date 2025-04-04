@@ -21,15 +21,13 @@ The deployment workflows includes the following:
 |PROJECT_NAME| As defined in the infrastructure repository|
 
 
-The backend will be accessible by adding the suffix "/admin/" to your chosen domain address.
-
 Authentication is handled by OIDC connected to an Entra ID tenant.
 
 # Authentication configuration
 
-The system has been integrated to work with Entra ID (formerly Azure AD) authentication, using azure/msal-react on the frontend and django_auth_adfs on the backend.
+The system has been integrated to work with Entra ID (formerly Azure AD) authentication. The backend uses [django_auth_adfs](https://django-auth-adfs.readthedocs.io/en/latest/) for authentication.
 
-msal-react uses ID tokens whereas django_auth_adfs uses Access tokens. Reference:  https://oauth.net/id-tokens-vs-access-tokens/
+django_auth_adfs uses Access tokens. Reference:  https://oauth.net/id-tokens-vs-access-tokens/
 
 To configure the application on Entra ID, we will need to register two apps, one for the frontend and one for the backend.
 
