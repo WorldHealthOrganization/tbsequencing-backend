@@ -331,7 +331,7 @@ class MatchingService(Service):
                 matched_sample = query.first()
                 if not matched_sample:
                     alias.add_verdict(
-                        "Detected NCBI ID is not yet available, re-match later",
+                        "Accession not found, match again later",
                         alias.VerdictLevel.ERROR,
                     )
                     alias.match_source = SampleAlias.MatchSource.NO_MATCH
@@ -341,7 +341,7 @@ class MatchingService(Service):
                 # Run additional validation
                 if not matched_sample.sequencing_data_set.exists():
                     alias.add_verdict(
-                        "NCBI Sample was recognized, but it has no SRA data",
+                        "Accession exists but has no sequencing data linked",
                         alias.VerdictLevel.WARNING,
                     )
                     alias.save()
