@@ -122,29 +122,6 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
     ]
 
 
-    # def get_fields(self, request, obj=None):
-    #     if obj.origin=="NCBI":
-    #         return [
-    #             "origin",
-    #             "get_bioproject_link",
-    #             "state_changed_on",
-    #             "description",
-    #             "samples_count",
-    #         ]
-    #     return [
-    #         "origin",
-    #         "state_changed_on",
-    #         "owner",
-    #         "description",
-    #         # "state",
-    #         "matching_state",
-    #         "samples_count",
-    #         "unmatched_samples_count",
-    #         "unmatched_mic_tests_count",
-    #         "unmatched_pds_tests_count",
-    #         "rejection_reason"
-    #     ]
-
 
     def get_queryset(self, request):
         """Annotate queryset with additional data."""
@@ -163,8 +140,6 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
 
         return query
 
-
-
     @admin.action(description="Schedule associated samples for bionformatic analysis.")
     def schedule_samples(self, request, queryset):
         count = 0
@@ -181,7 +156,6 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
                 .all()
             )
 
-            print(selection, len(selection))
             count+=len(selection)
 
             Sample.objects.filter(pk__in=selection).update(
