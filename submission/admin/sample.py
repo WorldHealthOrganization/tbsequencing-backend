@@ -113,9 +113,9 @@ class SampleAdmin(ImportExportModelAdmin):
     search_fields = ["aliases__name", "=id", "=biosample_id"]
 
     list_filter = [
-        "country",
         "bioanalysis_status",
         "origin",
+        "country",
     ]
 
     def get_form(self, request, obj=None, change=False, **kwargs):

@@ -101,6 +101,10 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         "get_bioproject_link"
     )
 
+    actions = [
+        "schedule_samples"
+    ]
+
     ordering = ["-state_changed_on"]
     # actions = [accept_pending_package, reject_pending_package]
     list_filter = [
@@ -216,6 +220,37 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         """
         return obj.samples_count
 
+
+    @admin.action(description="Schedule associated samples for bionformatic analysis.")
+    def schedule_samples(self, request, queryset):
+        count = 0
+        for obj in queryset:
+            selection = (
+                obj
+                .sample_aliases
+                .filter(
+                    Q(sample__bioanalysis_status__isnull=True)
+                    & Q(sample__ncbi_taxon_id=1773)
+                )
+                .values_list("sample")
+                .distinct()
+                .all()
+            )
+
+            print(selection, len(selection))
+            count+=len(selection)
+
+            Sample.objects.filter(pk__in=selection).update(
+                bioanalysis_status="Unprocessed"
+            )
+
+        self.message_user(
+            request,
+            f"{count} samples were scheduled for analysis.",
+            messages.SUCCESS,
+        )
+        return
+    
     @admin.display()
     def samples_left_for_processing(self, obj):
         """Show number of samples that have been through the bioinformatic pipeline."""
@@ -289,3 +324,17 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         del actions["delete_selected"]
         return actions
 
+    @admin.display()
+    def samples_left_for_processing(self, obj):
+        """Show number of samples that have not been through the bioinformatic pipeline."""
+        return (
+            obj.sample_aliases
+            .filter(
+                Q(sample__bioanalysis_status__isnull=True)
+                & Q(sample__ncbi_taxon_id=1773)
+
+            )
+            .values("sample")
+            .distinct()
+            .count()
+        )
