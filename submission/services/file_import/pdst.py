@@ -139,11 +139,9 @@ class PackageFilePDSTImportService(PackageFileImportService):
             drug_code, concentration = match.groups()
             try:
                 drug = self._drugs[drug_code.upper()]
-            except KeyError as exc:
-                raise ValidationError(
-                    f"{column}: Unknown drug code. Please check the column header values.",
-                ) from exc
-            self.test_columns[column] = (drug, concentration)
+                self.test_columns[column] = (drug, concentration)
+            except KeyError:
+                continue
 
     def get_medium(self, val: str) -> GrowthMedium:
         """Parse value as a medium. Raise error, if not found."""

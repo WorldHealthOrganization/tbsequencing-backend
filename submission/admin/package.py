@@ -11,6 +11,7 @@ from .package_stats import PackageStatsInline
 from .package_sequencing_data_inline import PackageSequencingDataInline
 from .contributor import ContributorInline
 
+
 class PackageOriginListFilter(admin.SimpleListFilter):
     """Custom admin filter, showing packages by their origin."""
 
@@ -116,28 +117,10 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         "name"
     ]
 
-    # def get_fields(self, request, obj=None):
-    #     if obj.origin=="NCBI":
-    #         return [
-    #             "origin",
-    #             "get_bioproject_link",
-    #             "state_changed_on",
-    #             "description",
-    #             "samples_count",
-    #         ]
-    #     return [
-    #         "origin",
-    #         "state_changed_on",
-    #         "owner",
-    #         "description",
-    #         # "state",
-    #         "matching_state",
-    #         "samples_count",
-    #         "unmatched_samples_count",
-    #         "unmatched_mic_tests_count",
-    #         "unmatched_pds_tests_count",
-    #         "rejection_reason"
-    #     ]
+    actions = [
+        "schedule_samples"
+    ]
+
 
 
     def get_queryset(self, request):
@@ -156,6 +139,35 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         )
 
         return query
+
+    @admin.action(description="Schedule associated samples for bionformatic analysis.")
+    def schedule_samples(self, request, queryset):
+        count = 0
+        for obj in queryset:
+            selection = (
+                obj
+                .sample_aliases
+                .filter(
+                    Q(sample__bioanalysis_status__isnull=True)
+                    & Q(sample__ncbi_taxon_id=1773)
+                )
+                .values_list("sample")
+                .distinct()
+                .all()
+            )
+
+            count+=len(selection)
+
+            Sample.objects.filter(pk__in=selection).update(
+                bioanalysis_status="Unprocessed"
+            )
+            
+        self.message_user(
+            request,
+            f"{count} samples were scheduled for analysis.",
+            messages.SUCCESS,
+        )
+        return
 
     @admin.display(description="BioProject ID")
     def get_bioproject_link(self, obj):
@@ -213,6 +225,19 @@ class PackageAdmin(FSMTransitionMixin, admin.ModelAdmin):
         )
         return
     
+    @admin.display()
+    def samples_left_for_processing(self, obj):
+        """Show number of samples that have been through the bioinformatic pipeline."""
+        return (
+            obj.sample_aliases
+            .filter(
+                Q(sample__bioanalysis_status__isnull=True)
+            )
+            .values("sample")
+            .distinct()
+            .count()
+        )
+
     @admin.display()
     def unmatched_samples_count(self, obj):
         """Show unmatched sample aliases count for a package."""

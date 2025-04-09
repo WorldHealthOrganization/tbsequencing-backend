@@ -6,6 +6,7 @@ Owned by the Global Tuberculosis Programme, GTB, Geneva Switzerland. References:
 
 The backend of the tbsequencing portal is based on the Django Rest Framework. All infrastructure required for running the backend is defined under the main [repository](https://github.com/finddx/tbsequencing-infrastructure).
 
+## Deployment
 The deployment workflows includes the following:
 
 1. Collecting the static files and copying them into an S3 bucket
@@ -13,15 +14,20 @@ The deployment workflows includes the following:
 3. Running the migration(s)
 4. Forcing deployment of the ECS fargate task to use latest docker image
 
-The backend will be accessible by adding the suffix "/admin/" to your chosen domain address.
+| Variables/Secrets for CICD | Description|
+|---|----|
+|AWS_ACCOUNT_ID||
+|AWS_REGION||
+|PROJECT_NAME| As defined in the infrastructure repository|
+
 
 Authentication is handled by OIDC connected to an Entra ID tenant.
 
 # Authentication configuration
 
-The system has been integrated to work with Entra ID (formerly Azure AD) authentication, using azure/msal-react on the frontend and django_auth_adfs on the backend.
+The system has been integrated to work with Entra ID (formerly Azure AD) authentication. The backend uses [django_auth_adfs](https://django-auth-adfs.readthedocs.io/en/latest/) for authentication.
 
-msal-react uses ID tokens whereas django_auth_adfs uses Access tokens. Reference:  https://oauth.net/id-tokens-vs-access-tokens/
+django_auth_adfs uses Access tokens. Reference:  https://oauth.net/id-tokens-vs-access-tokens/
 
 To configure the application on Entra ID, we will need to register two apps, one for the frontend and one for the backend.
 
@@ -283,9 +289,13 @@ ssh -i ${path_to_private_key} -g -L ${local_port}:${remote_database_host_name}:$
 ```
 
 If you use the default neworking mode in docker compose (i.e. `bridge`), you must the correct local ip address for the database host. 
-It cannot be `localhost` (unless you change the networking mode to `host`).
 
-For WSL, it's usually `172.17.0.1`. 
+Use the following command to get the local address of the bridge network:
+
+```
+docker network inspect bridge
+```
+
 
 Modify the following environment variable in `.dc.env`. You can fetch from secret manager the master username/master password.
 
