@@ -15,6 +15,7 @@ NO_COUNTRY = "pds_no_country.xlsx"
 NO_YOI = "pds_no_yoi.xlsx"
 CONTAINS_ALIAS_WO_TESTS = "pds_contains_alias_without_results.xlsx"
 SAME_NAME_DIFFERENT_DST_METHOD = "pds_same_name_different_dst.xlsx"
+HHH_DRUG_CODE = "pds_unknown_drug_code.xlsx"
 
 
 @pytest.mark.parametrize(
@@ -265,3 +266,27 @@ def test_attachment_created_after_import(
     assert attachment.type == attachment.Type.PDS
     # here somehow is full path to temp copy of a file
     assert attachment.original_filename.endswith(FILE_VALID)
+
+
+@pytest.mark.django_db(transaction=True)
+def test_unknown_drug_code(
+        package_of,
+        alice,
+        shared_datadir,
+        drugs,
+        growth_mediums,
+        countries,
+    ):
+    """Raise validation error on unknown drug code."""
+    package = package_of(alice)
+    with open(shared_datadir / HHH_DRUG_CODE, mode="rb") as file:
+        PackageFilePDSTImportService().execute(
+            dict(package=package_of(alice)),
+            dict(file=File(file)),
+        )
+   
+    attachment: Attachment = package_of(alice).attachments.first()
+
+    assert len(attachment.metadata["not_used_columns"]) == 4
+    assert "HHH (0.1)" in attachment.metadata["not_used_columns"]
+    
