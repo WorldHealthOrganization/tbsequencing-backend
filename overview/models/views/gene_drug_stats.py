@@ -82,6 +82,7 @@ variant_drug_test_counts as (
     select
         vs.variant_id,
         sdr.drug_id,
+        gene_db_crossref_id,
         sum(CASE WHEN test_result = 'S' THEN 1 ELSE 0 END) susceptible_count,
         sum(CASE WHEN test_result = 'R' THEN 1 ELSE 0 END) resistant_count,
         sum(CASE WHEN test_result = 'I' THEN 1 ELSE 0 END) intermediate_count
@@ -91,7 +92,7 @@ variant_drug_test_counts as (
     join overview_sampledrugresult sdr
         on vs.sample_id = sdr.sample_id
         and sdr.drug_id=fapg_distinct.drug_id
-    group by vs.variant_id, sdr.drug_id
+    group by vs.variant_id, sdr.drug_id, gene_db_crossref_id
 )
 select COALESCE(gene_name, locus_tag) gene_name,
        gene_db_crossref,
@@ -132,6 +133,7 @@ from overview_gene gene
     left join variant_drug_test_counts vdtc
         on vdtc.variant_id = fapg.variant_id
         and vdtc.drug_id = fapg.drug_id
+        and vdtc.gene_db_crossref_id = fapg.gene_db_crossref_id
     -- join variant grades (1 variant - m grades for m drugs)
     -- it is implied that final data should be filtered by single grade version
     left join genphen_variantgrade vg
