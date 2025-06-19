@@ -82,7 +82,7 @@ variant_drug_test_counts as (
     select
         vs.variant_id,
         sdr.drug_id,
-        fapg.proteic_annotation,
+        fapg_distinct.proteic_annotation,
         gene_db_crossref_id,
         sum(CASE WHEN test_result = 'S' THEN 1 ELSE 0 END) susceptible_count,
         sum(CASE WHEN test_result = 'R' THEN 1 ELSE 0 END) resistant_count,
@@ -93,7 +93,7 @@ variant_drug_test_counts as (
     join overview_sampledrugresult sdr
         on vs.sample_id = sdr.sample_id
         and sdr.drug_id=fapg_distinct.drug_id
-    group by vs.variant_id, sdr.drug_id, gene_db_crossref_id, fapg.proteic_annotation
+    group by vs.variant_id, sdr.drug_id, gene_db_crossref_id, fapg_distinct.proteic_annotation
 )
 select COALESCE(gene_name, locus_tag) gene_name,
        gene_db_crossref,
