@@ -94,7 +94,11 @@ variant_drug_test_counts as (
     join overview_sampledrugresult sdr
         on vs.sample_id = sdr.sample_id
         and sdr.drug_id=fapg_distinct.drug_id
-    group by vs.variant_id, sdr.drug_id, gene_db_crossref_id, fapg_distinct.proteic_annotation
+    group by vs.variant_id,
+        sdr.drug_id,
+        gene_db_crossref_id,
+        fapg_distinct.proteic_annotation,
+        fapg_distinct.nucleotidic_annotation
 )
 select COALESCE(gene_name, locus_tag) gene_name,
        gene_db_crossref,
