@@ -3,6 +3,7 @@
 from . import (
     attachment,
     communication,
+    contributor,
     package,
     sample,
     sample_alias,
