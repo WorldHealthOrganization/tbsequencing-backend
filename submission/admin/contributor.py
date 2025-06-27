@@ -2,7 +2,9 @@ from django.contrib import admin
 
 from submission.models import Contributor
 
-class ContributorInline(admin.TabularInline):
+
+@admin.register(Contributor)
+class ContributorAdmin(admin.ModelAdmin):
     """Inline display in the package view."""
     model = Contributor
     extra = 0
