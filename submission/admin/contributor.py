@@ -3,8 +3,7 @@ from django.contrib import admin
 from submission.models import Contributor
 
 
-@admin.register(Contributor)
-class ContributorAdmin(admin.ModelAdmin):
+class ContributorInline(admin.TabularInline):
     """Inline display in the package view."""
     model = Contributor
     extra = 0
@@ -19,6 +18,18 @@ class ContributorAdmin(admin.ModelAdmin):
         "last_name",
         "role"
     ]
+
+    readonly_fields = [
+        "first_name",
+        "last_name",
+        "role"
+    ]
+
+
+
+@admin.register(Contributor)
+class ContributorAdmin(admin.ModelAdmin):
+    """Contributor admin page."""
 
     readonly_fields = [
         "first_name",
