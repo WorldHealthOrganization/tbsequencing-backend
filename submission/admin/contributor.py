@@ -40,7 +40,7 @@ class ContributorInline(admin.TabularInline):
 class ContributorAdmin(ImportExportModelAdmin):
     """Contributor admin page."""
 
-    resource_classes = [Contributor]
+    resource_classes = [ContributorResource]
 
     readonly_fields = [
         "first_name",

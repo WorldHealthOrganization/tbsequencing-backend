@@ -16,9 +16,3 @@ class Contributor(models.Model):
         related_name="contributors",
     )
 
-
-
-    def __str__(self):
-        """Human readable representation."""
-        return f"{self.pk}"
-
