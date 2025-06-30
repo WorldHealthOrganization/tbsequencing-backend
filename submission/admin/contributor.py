@@ -2,7 +2,13 @@ from django.contrib import admin
 
 from submission.models import Contributor
 
+from import_export import resources
 from import_export.admin import ImportExportModelAdmin
+
+
+class ContributorResource(resources.ModelResource):
+    class Meta:
+        model = Contributor
 
 
 
@@ -31,8 +37,10 @@ class ContributorInline(admin.TabularInline):
 
 
 @admin.register(Contributor)
-class ContributorAdmin(admin.ModelAdmin):
+class ContributorAdmin(ImportExportModelAdmin):
     """Contributor admin page."""
+
+    resource_classes = [Contributor]
 
     readonly_fields = [
         "first_name",
