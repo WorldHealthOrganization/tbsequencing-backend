@@ -15,3 +15,10 @@ class Contributor(models.Model):
         on_delete=models.CASCADE,
         related_name="contributors",
     )
+
+
+
+    def __str__(self):
+        """Human readable representation."""
+        return f"{self.pk}"
+
