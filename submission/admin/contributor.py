@@ -2,6 +2,9 @@ from django.contrib import admin
 
 from submission.models import Contributor
 
+from import_export.admin import ImportExportModelAdmin
+
+
 
 class ContributorInline(admin.TabularInline):
     """Inline display in the package view."""
